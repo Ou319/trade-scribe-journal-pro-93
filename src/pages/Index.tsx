@@ -24,7 +24,7 @@ const Index = () => {
           {/* Week Detail */}
           <WeekDetail />
           
-          {/* Chart Analysis - As requested, moved to the end */}
+          {/* Chart Analysis - Positioned at the bottom */}
           <div className="mb-4">
             <ChartAnalysis />
           </div>
