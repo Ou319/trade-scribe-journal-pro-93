@@ -13,8 +13,8 @@ const Index = () => {
     <div className="flex flex-col min-h-screen">
       <Navbar />
       
-      <main className="flex-1 container mx-auto px-3 sm:px-4 py-4 sm:py-6">
-        <div className="space-y-5 sm:space-y-6">
+      <main className="flex-1 container mx-auto px-2 sm:px-4 py-3 sm:py-6">
+        <div className="grid grid-cols-1 gap-3 sm:gap-4">
           {/* Capital Display */}
           <CapitalDisplay />
           
@@ -24,16 +24,16 @@ const Index = () => {
           {/* Week Detail */}
           <WeekDetail />
           
-          {/* Chart Analysis - Moved to the end */}
-          <section className="mb-8">
+          {/* Chart Analysis - As requested, moved to the end */}
+          <div className="mb-4">
             <ChartAnalysis />
-          </section>
+          </div>
         </div>
       </main>
       
-      <footer className="border-t py-3 sm:py-4 bg-gradient-to-r from-primary/10 to-primary/5">
-        <div className="container mx-auto px-3 sm:px-4 text-center">
-          <div className="text-sm text-muted-foreground mb-1">
+      <footer className="border-t py-3 bg-gradient-to-r from-primary/10 to-primary/5">
+        <div className="container mx-auto px-3 text-center">
+          <div className="text-xs sm:text-sm text-muted-foreground mb-1">
             YTR - Journal de Trading &copy; {new Date().getFullYear()}
           </div>
           <div className="text-xs font-medium text-primary">
