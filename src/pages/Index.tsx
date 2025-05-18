@@ -2,6 +2,7 @@
 import { useJournal } from "@/contexts/JournalContext";
 import Navbar from "@/components/layout/Navbar";
 import DashboardStats from "@/components/dashboard/DashboardStats";
+import ChartAnalysis from "@/components/dashboard/ChartAnalysis";
 import WeekDetail from "@/components/weeks/WeekDetail";
 
 const Index = () => {
@@ -13,6 +14,11 @@ const Index = () => {
       
       <main className="flex-1 container mx-auto px-4 py-8">
         <DashboardStats />
+        
+        <div className="my-6">
+          <ChartAnalysis />
+        </div>
+        
         <WeekDetail />
       </main>
       

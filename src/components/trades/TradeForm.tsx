@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useJournal } from "@/contexts/JournalContext";
 import { Button } from "@/components/ui/button";
@@ -22,8 +23,10 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
-import { CalendarIcon, X, ImagePlus, Image } from "lucide-react";
+import { CalendarIcon, X, Link, Image } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { toast } from "@/hooks/use-toast";
 
 type TradeFormData = Omit<Trade, "id">;
 
@@ -69,12 +72,12 @@ const TradeForm = ({ weekId, initialData, onComplete, isEditing = false }: Trade
     initialData && !commonPairs.includes(initialData.pair)
   );
   
-  // Image preview states
-  const [beforeImagePreview, setBeforeImagePreview] = useState<string | null>(
-    initialData?.beforeTradeImage || null
+  // Image URL states
+  const [beforeImageUrl, setBeforeImageUrl] = useState<string>(
+    initialData?.beforeTradeImage || ""
   );
-  const [afterImagePreview, setAfterImagePreview] = useState<string | null>(
-    initialData?.afterTradeImage || null
+  const [afterImageUrl, setAfterImageUrl] = useState<string>(
+    initialData?.afterTradeImage || ""
   );
 
   // Calculate Risk/Reward whenever relevant fields change
@@ -136,36 +139,15 @@ const TradeForm = ({ weekId, initialData, onComplete, isEditing = false }: Trade
     }
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>, imageType: 'before' | 'after') => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const handleImageUrlChange = (e: React.ChangeEvent<HTMLInputElement>, imageType: 'before' | 'after') => {
+    const url = e.target.value;
     
-    // Create a preview URL for the image
-    const imageUrl = URL.createObjectURL(file);
-    
-    // Convert the image to base64 for storage
-    const reader = new FileReader();
-    reader.onload = () => {
-      const base64String = reader.result as string;
-      
-      if (imageType === 'before') {
-        setBeforeImagePreview(imageUrl);
-        setFormData(prev => ({ ...prev, beforeTradeImage: base64String }));
-      } else {
-        setAfterImagePreview(imageUrl);
-        setFormData(prev => ({ ...prev, afterTradeImage: base64String }));
-      }
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const handleRemoveImage = (imageType: 'before' | 'after') => {
     if (imageType === 'before') {
-      setBeforeImagePreview(null);
-      setFormData(prev => ({ ...prev, beforeTradeImage: null }));
+      setBeforeImageUrl(url);
+      setFormData(prev => ({ ...prev, beforeTradeImage: url }));
     } else {
-      setAfterImagePreview(null);
-      setFormData(prev => ({ ...prev, afterTradeImage: null }));
+      setAfterImageUrl(url);
+      setFormData(prev => ({ ...prev, afterTradeImage: url }));
     }
   };
 
@@ -204,6 +186,11 @@ const TradeForm = ({ weekId, initialData, onComplete, isEditing = false }: Trade
       addTrade(weekId, finalData);
     }
     
+    toast({
+      title: isEditing ? "Trade Updated" : "Trade Added",
+      description: `${finalData.pair} trade has been ${isEditing ? "updated" : "added"} successfully.`
+    });
+    
     handleClose();
   };
 
@@ -214,341 +201,361 @@ const TradeForm = ({ weekId, initialData, onComplete, isEditing = false }: Trade
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh]">
         <DialogHeader>
           <DialogTitle>{isEditing ? "Edit Trade" : "Add New Trade"}</DialogTitle>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="space-y-4 py-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Date Picker */}
-            <div className="space-y-2">
-              <Label htmlFor="date">Date</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant={"outline"}
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !formData.date && "text-muted-foreground"
-                    )}
+        <ScrollArea className="h-[70vh] pr-4">
+          <form onSubmit={handleSubmit} className="space-y-4 py-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Date Picker */}
+              <div className="space-y-2">
+                <Label htmlFor="date">Date</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant={"outline"}
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !formData.date && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {formData.date ? (
+                        format(formData.date, "PPP")
+                      ) : (
+                        <span>Pick a date</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      selected={formData.date}
+                      onSelect={handleDateChange}
+                      initialFocus
+                      className="pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+              
+              {/* Pair Selection */}
+              <div className="space-y-2">
+                <Label htmlFor="pair">Trading Pair</Label>
+                {showCustomPair ? (
+                  <div className="flex space-x-2">
+                    <Input
+                      id="custom-pair"
+                      value={customPair}
+                      onChange={(e) => setCustomPair(e.target.value)}
+                      placeholder="Enter pair (e.g. EURCAD)"
+                      className="flex-1"
+                    />
+                    <Button 
+                      type="button" 
+                      variant="ghost" 
+                      size="icon" 
+                      onClick={() => {
+                        setShowCustomPair(false);
+                        setCustomPair("");
+                      }}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <Select
+                    value={formData.pair}
+                    onValueChange={(value) => handleSelectChange("pair", value)}
                   >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {formData.date ? (
-                      format(formData.date, "PPP")
-                    ) : (
-                      <span>Pick a date</span>
-                    )}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={formData.date}
-                    onSelect={handleDateChange}
-                    initialFocus
-                    className="pointer-events-auto"
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-            
-            {/* Pair Selection */}
-            <div className="space-y-2">
-              <Label htmlFor="pair">Trading Pair</Label>
-              {showCustomPair ? (
-                <div className="flex space-x-2">
-                  <Input
-                    id="custom-pair"
-                    value={customPair}
-                    onChange={(e) => setCustomPair(e.target.value)}
-                    placeholder="Enter pair (e.g. EURCAD)"
-                    className="flex-1"
-                  />
-                  <Button 
-                    type="button" 
-                    variant="ghost" 
-                    size="icon" 
-                    onClick={() => {
-                      setShowCustomPair(false);
-                      setCustomPair("");
-                    }}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-              ) : (
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select Pair" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {commonPairs.map((pair) => (
+                        <SelectItem key={pair} value={pair}>
+                          {pair}
+                        </SelectItem>
+                      ))}
+                      <SelectItem value="custom">Custom Pair...</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              </div>
+              
+              {/* Type Selection */}
+              <div className="space-y-2">
+                <Label htmlFor="type">Trade Type</Label>
                 <Select
-                  value={formData.pair}
-                  onValueChange={(value) => handleSelectChange("pair", value)}
+                  value={formData.type}
+                  onValueChange={(value) => handleSelectChange("type", value as TradeType)}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select Pair" />
+                    <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {commonPairs.map((pair) => (
-                      <SelectItem key={pair} value={pair}>
-                        {pair}
-                      </SelectItem>
-                    ))}
-                    <SelectItem value="custom">Custom Pair...</SelectItem>
+                    <SelectItem value="Long">Long</SelectItem>
+                    <SelectItem value="Short">Short</SelectItem>
                   </SelectContent>
                 </Select>
-              )}
-            </div>
-            
-            {/* Type Selection */}
-            <div className="space-y-2">
-              <Label htmlFor="type">Trade Type</Label>
-              <Select
-                value={formData.type}
-                onValueChange={(value) => handleSelectChange("type", value as TradeType)}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Long">Long</SelectItem>
-                  <SelectItem value="Short">Short</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            {/* Entry Price */}
-            <div className="space-y-2">
-              <Label htmlFor="entry">Entry Price</Label>
-              <Input
-                id="entry"
-                name="entry"
-                type="number"
-                step="any"
-                value={formData.entry || ""}
-                onChange={handleChange}
-                placeholder="0.00"
-              />
-            </div>
-            
-            {/* Stop Loss */}
-            <div className="space-y-2">
-              <Label htmlFor="stopLoss">Stop Loss</Label>
-              <Input
-                id="stopLoss"
-                name="stopLoss"
-                type="number"
-                step="any"
-                value={formData.stopLoss || ""}
-                onChange={handleChange}
-                placeholder="0.00"
-                className="border-loss/40"
-              />
-            </div>
-            
-            {/* Take Profit */}
-            <div className="space-y-2">
-              <Label htmlFor="takeProfit">Take Profit</Label>
-              <Input
-                id="takeProfit"
-                name="takeProfit"
-                type="number"
-                step="any"
-                value={formData.takeProfit || ""}
-                onChange={handleChange}
-                placeholder="0.00"
-                className="border-profit/40"
-              />
-            </div>
-            
-            {/* Risk % */}
-            <div className="space-y-2">
-              <Label htmlFor="risk">Risk %</Label>
-              <Input
-                id="risk"
-                name="risk"
-                type="number"
-                step="0.1"
-                min="0.1"
-                value={formData.risk || ""}
-                onChange={handleChange}
-                placeholder="1.0"
-              />
-            </div>
-            
-            {/* Risk/Reward (Calculated) */}
-            <div className="space-y-2">
-              <Label htmlFor="riskReward">Risk/Reward</Label>
-              <Input
-                id="riskReward"
-                value={formData.riskReward}
-                readOnly
-                disabled
-              />
-            </div>
-            
-            {/* Status */}
-            <div className="space-y-2">
-              <Label htmlFor="status">Status</Label>
-              <Select
-                value={formData.status}
-                onValueChange={(value) => handleSelectChange("status", value as TradeStatus)}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Pending">Pending</SelectItem>
-                  <SelectItem value="Done">Done</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            {/* Result (only if status is Done) */}
-            <div className="space-y-2">
-              <Label htmlFor="result">Result</Label>
-              <Select
-                value={formData.result || ""}
-                onValueChange={(value) => handleSelectChange("result", value as TradeResult)}
-                disabled={formData.status !== "Done"}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select Result" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Win">Win</SelectItem>
-                  <SelectItem value="Loss">Loss</SelectItem>
-                  <SelectItem value="Breakeven">Breakeven</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            {/* Gain/Loss % (Calculated) */}
-            <div className="space-y-2">
-              <Label htmlFor="gainLossPercent">Gain/Loss %</Label>
-              <Input
-                id="gainLossPercent"
-                value={formData.status === "Done" ? `${formData.gainLossPercent > 0 ? '+' : ''}${formData.gainLossPercent}%` : "-"}
-                readOnly
-                disabled
-                className={formData.gainLossPercent > 0 ? "border-profit/40" : formData.gainLossPercent < 0 ? "border-loss/40" : ""}
-              />
-            </div>
-          </div>
-          
-          {/* Before Trade Image */}
-          <div className="space-y-2">
-            <Label htmlFor="beforeTradeImage">Before Trade Image</Label>
-            {beforeImagePreview ? (
-              <div className="relative">
-                <img 
-                  src={beforeImagePreview} 
-                  alt="Before Trade" 
-                  className="max-h-40 rounded-md border border-border object-contain mx-auto"
+              </div>
+              
+              {/* Entry Price */}
+              <div className="space-y-2">
+                <Label htmlFor="entry">Entry Price</Label>
+                <Input
+                  id="entry"
+                  name="entry"
+                  type="number"
+                  step="any"
+                  value={formData.entry || ""}
+                  onChange={handleChange}
+                  placeholder="0.00"
                 />
-                <Button
-                  type="button"
-                  variant="destructive"
-                  size="icon"
-                  className="absolute top-1 right-1"
-                  onClick={() => handleRemoveImage('before')}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
               </div>
-            ) : (
-              <div className="flex items-center justify-center w-full">
-                <label
-                  htmlFor="dropzone-before"
-                  className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted/20 border-border hover:bg-muted/30"
-                >
-                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                    <ImagePlus className="w-8 h-8 mb-2 text-muted-foreground" />
-                    <p className="text-sm text-muted-foreground">
-                      <span className="font-medium">Click to upload</span> or drag and drop
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      PNG, JPG, GIF (max 5MB)
-                    </p>
-                  </div>
-                  <Input
-                    id="dropzone-before"
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => handleImageChange(e, 'before')}
-                  />
-                </label>
-              </div>
-            )}
-          </div>
-          
-          {/* After Trade Image */}
-          <div className="space-y-2">
-            <Label htmlFor="afterTradeImage">After Trade Image</Label>
-            {afterImagePreview ? (
-              <div className="relative">
-                <img 
-                  src={afterImagePreview} 
-                  alt="After Trade" 
-                  className="max-h-40 rounded-md border border-border object-contain mx-auto"
+              
+              {/* Stop Loss */}
+              <div className="space-y-2">
+                <Label htmlFor="stopLoss">Stop Loss</Label>
+                <Input
+                  id="stopLoss"
+                  name="stopLoss"
+                  type="number"
+                  step="any"
+                  value={formData.stopLoss || ""}
+                  onChange={handleChange}
+                  placeholder="0.00"
+                  className="border-loss/40"
                 />
-                <Button
-                  type="button"
-                  variant="destructive"
-                  size="icon"
-                  className="absolute top-1 right-1"
-                  onClick={() => handleRemoveImage('after')}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
               </div>
-            ) : (
-              <div className="flex items-center justify-center w-full">
-                <label
-                  htmlFor="dropzone-after"
-                  className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted/20 border-border hover:bg-muted/30"
+              
+              {/* Take Profit */}
+              <div className="space-y-2">
+                <Label htmlFor="takeProfit">Take Profit</Label>
+                <Input
+                  id="takeProfit"
+                  name="takeProfit"
+                  type="number"
+                  step="any"
+                  value={formData.takeProfit || ""}
+                  onChange={handleChange}
+                  placeholder="0.00"
+                  className="border-profit/40"
+                />
+              </div>
+              
+              {/* Risk % */}
+              <div className="space-y-2">
+                <Label htmlFor="risk">Risk %</Label>
+                <Input
+                  id="risk"
+                  name="risk"
+                  type="number"
+                  step="0.1"
+                  min="0.1"
+                  value={formData.risk || ""}
+                  onChange={handleChange}
+                  placeholder="1.0"
+                />
+              </div>
+              
+              {/* Risk/Reward (Calculated) */}
+              <div className="space-y-2">
+                <Label htmlFor="riskReward">Risk/Reward</Label>
+                <Input
+                  id="riskReward"
+                  value={formData.riskReward}
+                  readOnly
+                  disabled
+                />
+              </div>
+              
+              {/* Status */}
+              <div className="space-y-2">
+                <Label htmlFor="status">Status</Label>
+                <Select
+                  value={formData.status}
+                  onValueChange={(value) => handleSelectChange("status", value as TradeStatus)}
                 >
-                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                    <ImagePlus className="w-8 h-8 mb-2 text-muted-foreground" />
-                    <p className="text-sm text-muted-foreground">
-                      <span className="font-medium">Click to upload</span> or drag and drop
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      PNG, JPG, GIF (max 5MB)
-                    </p>
-                  </div>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Pending">Pending</SelectItem>
+                    <SelectItem value="Done">Done</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              {/* Result (only if status is Done) */}
+              <div className="space-y-2">
+                <Label htmlFor="result">Result</Label>
+                <Select
+                  value={formData.result || ""}
+                  onValueChange={(value) => handleSelectChange("result", value as TradeResult)}
+                  disabled={formData.status !== "Done"}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select Result" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Win">Win</SelectItem>
+                    <SelectItem value="Loss">Loss</SelectItem>
+                    <SelectItem value="Breakeven">Breakeven</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              {/* Gain/Loss % (Calculated) */}
+              <div className="space-y-2">
+                <Label htmlFor="gainLossPercent">Gain/Loss %</Label>
+                <Input
+                  id="gainLossPercent"
+                  value={formData.status === "Done" ? `${formData.gainLossPercent > 0 ? '+' : ''}${formData.gainLossPercent}%` : "-"}
+                  readOnly
+                  disabled
+                  className={formData.gainLossPercent > 0 ? "border-profit/40" : formData.gainLossPercent < 0 ? "border-loss/40" : ""}
+                />
+              </div>
+            </div>
+            
+            {/* Before Trade Image URL */}
+            <div className="space-y-2">
+              <Label htmlFor="beforeTradeImage">Before Trade Image URL</Label>
+              <div className="flex flex-col space-y-3">
+                <div className="flex space-x-2">
                   <Input
-                    id="dropzone-after"
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => handleImageChange(e, 'after')}
+                    id="beforeTradeImageUrl"
+                    placeholder="https://example.com/image.jpg"
+                    value={beforeImageUrl}
+                    onChange={(e) => handleImageUrlChange(e, 'before')}
+                    className="flex-1"
                   />
-                </label>
+                  {beforeImageUrl && (
+                    <Button 
+                      type="button" 
+                      variant="ghost" 
+                      size="icon" 
+                      onClick={() => {
+                        setBeforeImageUrl("");
+                        setFormData(prev => ({ ...prev, beforeTradeImage: null }));
+                      }}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+                
+                {beforeImageUrl && (
+                  <div className="relative rounded-md overflow-hidden border border-border">
+                    <img 
+                      src={beforeImageUrl} 
+                      alt="Before Trade" 
+                      className="max-h-40 w-full object-contain mx-auto"
+                      onError={(e) => {
+                        e.currentTarget.src = "/placeholder.svg";
+                        toast({
+                          title: "Image Error",
+                          description: "The image URL could not be loaded",
+                          variant: "destructive",
+                        });
+                      }}
+                    />
+                  </div>
+                )}
+                
+                {!beforeImageUrl && (
+                  <div className="h-20 flex items-center justify-center border border-dashed rounded-md">
+                    <div className="flex flex-col items-center text-muted-foreground">
+                      <Link className="h-5 w-5 mb-1" />
+                      <span className="text-xs">Enter image URL above</span>
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-          
-          {/* Comment */}
-          <div className="space-y-2">
-            <Label htmlFor="comment">Comment</Label>
-            <Textarea
-              id="comment"
-              name="comment"
-              value={formData.comment}
-              onChange={handleChange}
-              placeholder="Add your notes or observations about this trade..."
-              rows={3}
-            />
-          </div>
-          
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={handleClose}>
-              Cancel
-            </Button>
-            <Button type="submit">
-              {isEditing ? "Update Trade" : "Add Trade"}
-            </Button>
-          </DialogFooter>
-        </form>
+            </div>
+            
+            {/* After Trade Image URL */}
+            <div className="space-y-2">
+              <Label htmlFor="afterTradeImage">After Trade Image URL</Label>
+              <div className="flex flex-col space-y-3">
+                <div className="flex space-x-2">
+                  <Input
+                    id="afterTradeImageUrl"
+                    placeholder="https://example.com/image.jpg"
+                    value={afterImageUrl}
+                    onChange={(e) => handleImageUrlChange(e, 'after')}
+                    className="flex-1"
+                  />
+                  {afterImageUrl && (
+                    <Button 
+                      type="button" 
+                      variant="ghost" 
+                      size="icon" 
+                      onClick={() => {
+                        setAfterImageUrl("");
+                        setFormData(prev => ({ ...prev, afterTradeImage: null }));
+                      }}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+                
+                {afterImageUrl && (
+                  <div className="relative rounded-md overflow-hidden border border-border">
+                    <img 
+                      src={afterImageUrl} 
+                      alt="After Trade" 
+                      className="max-h-40 w-full object-contain mx-auto"
+                      onError={(e) => {
+                        e.currentTarget.src = "/placeholder.svg";
+                        toast({
+                          title: "Image Error",
+                          description: "The image URL could not be loaded",
+                          variant: "destructive",
+                        });
+                      }}
+                    />
+                  </div>
+                )}
+                
+                {!afterImageUrl && (
+                  <div className="h-20 flex items-center justify-center border border-dashed rounded-md">
+                    <div className="flex flex-col items-center text-muted-foreground">
+                      <Link className="h-5 w-5 mb-1" />
+                      <span className="text-xs">Enter image URL above</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            {/* Comment */}
+            <div className="space-y-2">
+              <Label htmlFor="comment">Comment</Label>
+              <Textarea
+                id="comment"
+                name="comment"
+                value={formData.comment}
+                onChange={handleChange}
+                placeholder="Add your notes or observations about this trade..."
+                rows={3}
+              />
+            </div>
+            
+            <DialogFooter className="pt-4">
+              <Button type="button" variant="outline" onClick={handleClose}>
+                Cancel
+              </Button>
+              <Button type="submit">
+                {isEditing ? "Update Trade" : "Add Trade"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   );
