@@ -25,9 +25,14 @@ const Index = () => {
         <WeekDetail />
       </main>
       
-      <footer className="border-t py-4">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          YTR - Journal de Trading &copy; {new Date().getFullYear()}
+      <footer className="border-t py-4 bg-gradient-to-r from-primary/10 to-primary/5">
+        <div className="container mx-auto px-4 text-center">
+          <div className="text-sm text-muted-foreground mb-1">
+            YTR - Journal de Trading &copy; {new Date().getFullYear()}
+          </div>
+          <div className="text-xs font-medium text-primary">
+            This web site made By Outmane El ouaafa
+          </div>
         </div>
       </footer>
     </div>

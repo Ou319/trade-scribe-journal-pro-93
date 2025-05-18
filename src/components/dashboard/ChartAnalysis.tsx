@@ -3,9 +3,9 @@ import { useState } from "react";
 import { useJournal } from "@/contexts/JournalContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { PieChart, Pie, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend, Cell, ResponsiveContainer, LineChart, Line } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend, ResponsiveContainer, LineChart, Line } from "recharts";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ChartPie, BarChart3, TrendingUp } from "lucide-react";
+import { BarChart3, TrendingUp } from "lucide-react";
 
 type PairAnalysis = {
   name: string;
@@ -22,15 +22,10 @@ type DailyProfitLoss = {
 
 const ChartAnalysis = () => {
   const { journal } = useJournal();
-  const [activeTab, setActiveTab] = useState("pairs");
+  const [activeTab, setActiveTab] = useState("profitloss");
   
   // Process data for the charts
   const pairAnalysis = processPairData(journal.weeks);
-  
-  // Sort pairs by frequency
-  const mostActivePairs = [...pairAnalysis]
-    .sort((a, b) => b.count - a.count)
-    .slice(0, 10); // Top 10 pairs
   
   // Sort pairs by profit/loss
   const profitLossPairs = [...pairAnalysis]
@@ -40,31 +35,22 @@ const ChartAnalysis = () => {
   // Process daily profit/loss data
   const dailyProfitLoss = processDailyProfitLoss(journal.weeks);
   
-  // Colors for the charts
-  const COLORS = [
-    "#8B5CF6", "#D946EF", "#F97316", "#0EA5E9", "#10B981", 
-    "#6366F1", "#EC4899", "#F59E0B", "#3B82F6", "#14B8A6"
-  ];
-  
   return (
     <Card className="shadow-md border-opacity-50 bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 overflow-hidden">
       <CardHeader className="border-b pb-3">
         <CardTitle className="text-xl font-semibold flex items-center">
-          <ChartPie className="mr-2 h-5 w-5 text-primary" /> 
+          <BarChart3 className="mr-2 h-5 w-5 text-primary" /> 
           Trading Analysis
         </CardTitle>
       </CardHeader>
       <CardContent className="pt-5">
         <Tabs
-          defaultValue="pairs"
+          defaultValue="profitloss"
           value={activeTab}
           onValueChange={setActiveTab}
           className="w-full"
         >
-          <TabsList className="grid w-full grid-cols-3 mb-6">
-            <TabsTrigger value="pairs" className="flex items-center">
-              <ChartPie className="mr-2 h-4 w-4" /> Most Active Pairs
-            </TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 mb-6">
             <TabsTrigger value="profitloss" className="flex items-center">
               <BarChart3 className="mr-2 h-4 w-4" /> Profit & Loss by Pair
             </TabsTrigger>
@@ -73,47 +59,9 @@ const ChartAnalysis = () => {
             </TabsTrigger>
           </TabsList>
           
-          <TabsContent value="pairs" className="mt-4">
-            {mostActivePairs.length > 0 ? (
-              <div className="h-[350px] sm:h-[400px]">
-                <ChartContainer
-                  config={{
-                    active: { theme: { dark: "#8B5CF6", light: "#8B5CF6" } },
-                    inactive: { theme: { dark: "#6b6b6b", light: "#d4d4d4" } },
-                  }}
-                >
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={mostActivePairs}
-                        cx="50%"
-                        cy="50%"
-                        labelLine={false}
-                        outerRadius="80%"
-                        fill="#8884d8"
-                        dataKey="count"
-                        nameKey="name"
-                        label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                      >
-                        {mostActivePairs.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <ChartTooltip content={<ChartTooltipContent />} />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </ChartContainer>
-              </div>
-            ) : (
-              <div className="text-center py-10 text-muted-foreground">
-                No trade data available. Add some trades to see the chart.
-              </div>
-            )}
-          </TabsContent>
-          
           <TabsContent value="profitloss" className="mt-4">
             {profitLossPairs.length > 0 ? (
-              <div className="h-[350px] sm:h-[400px]">
+              <div className="h-[300px] sm:h-[350px] md:h-[400px]">
                 <ChartContainer
                   config={{
                     profit: { theme: { dark: "#10B981", light: "#10B981" } },
@@ -121,10 +69,19 @@ const ChartAnalysis = () => {
                   }}
                 >
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={profitLossPairs}>
+                    <BarChart 
+                      data={profitLossPairs}
+                      margin={{ top: 10, right: 10, left: 0, bottom: 30 }}
+                    >
                       <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.1)" />
-                      <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-                      <YAxis tick={{ fontSize: 12 }} />
+                      <XAxis 
+                        dataKey="name" 
+                        tick={{ fontSize: 10 }} 
+                        angle={-45}
+                        textAnchor="end"
+                        height={70}
+                      />
+                      <YAxis tick={{ fontSize: 10 }} />
                       <ChartTooltip content={<ChartTooltipContent />} />
                       <Legend wrapperStyle={{ paddingTop: 15 }} />
                       <Bar dataKey="profit" name="Profit %" fill="#10B981" radius={[4, 4, 0, 0]} />
@@ -142,25 +99,34 @@ const ChartAnalysis = () => {
           
           <TabsContent value="daily" className="mt-4">
             {dailyProfitLoss.length > 0 ? (
-              <div className="h-[350px] sm:h-[400px]">
+              <div className="h-[300px] sm:h-[350px] md:h-[400px]">
                 <ChartContainer
                   config={{
                     value: { theme: { dark: "#3b82f6", light: "#3b82f6" } },
                   }}
                 >
                   <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={dailyProfitLoss}>
+                    <LineChart 
+                      data={dailyProfitLoss}
+                      margin={{ top: 10, right: 10, left: 0, bottom: 30 }}
+                    >
                       <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.1)" />
-                      <XAxis dataKey="date" tick={{ fontSize: 12 }} />
-                      <YAxis tick={{ fontSize: 12 }} />
+                      <XAxis 
+                        dataKey="date" 
+                        tick={{ fontSize: 10 }}
+                        angle={-45}
+                        textAnchor="end"
+                        height={70}
+                      />
+                      <YAxis tick={{ fontSize: 10 }} />
                       <ChartTooltip content={<ChartTooltipContent nameKey="date" />} />
                       <Line 
                         type="monotone" 
                         dataKey="value" 
                         stroke="#3b82f6" 
                         strokeWidth={2}
-                        dot={{ r: 4, fill: "#3b82f6" }}
-                        activeDot={{ r: 6, fill: "#3b82f6", stroke: "#fff" }}
+                        dot={{ r: 3, fill: "#3b82f6" }}
+                        activeDot={{ r: 5, fill: "#3b82f6", stroke: "#fff" }}
                         name="Profit/Loss %"
                       />
                     </LineChart>
@@ -174,6 +140,62 @@ const ChartAnalysis = () => {
             )}
           </TabsContent>
         </Tabs>
+
+        <div className="mt-6 pt-4 border-t">
+          <h3 className="text-sm font-semibold text-muted-foreground mb-2">Total Profit/Loss by Day</h3>
+          <div className="h-[180px] sm:h-[200px]">
+            {dailyProfitLoss.length > 0 ? (
+              <ChartContainer
+                config={{
+                  value: { theme: { dark: "#10B981", light: "#10B981" } },
+                  negative: { theme: { dark: "#F43F5E", light: "#F43F5E" } },
+                }}
+              >
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart 
+                    data={dailyProfitLoss}
+                    margin={{ top: 5, right: 5, left: 0, bottom: 25 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.1)" />
+                    <XAxis 
+                      dataKey="date" 
+                      tick={{ fontSize: 9 }}
+                      angle={-45}
+                      textAnchor="end"
+                      height={50}
+                    />
+                    <YAxis tick={{ fontSize: 9 }} />
+                    <ChartTooltip content={<ChartTooltipContent nameKey="date" />} />
+                    <Bar 
+                      dataKey="value" 
+                      name="Daily P/L" 
+                      fill="#10B981"
+                      radius={[4, 4, 0, 0]}
+                      isAnimationActive={true}
+                      animationDuration={1000}
+                      shape={(props) => {
+                        // Determine color based on value
+                        const fill = props.value >= 0 ? "#10B981" : "#F43F5E";
+                        return <rect 
+                          x={props.x} 
+                          y={props.value >= 0 ? props.y : props.y - props.height} 
+                          width={props.width} 
+                          height={Math.abs(props.height)} 
+                          fill={fill} 
+                          radius={[4, 4, 0, 0]}
+                        />
+                      }}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </ChartContainer>
+            ) : (
+              <div className="text-center py-10 text-muted-foreground">
+                No daily profit/loss data available.
+              </div>
+            )}
+          </div>
+        </div>
       </CardContent>
     </Card>
   );
