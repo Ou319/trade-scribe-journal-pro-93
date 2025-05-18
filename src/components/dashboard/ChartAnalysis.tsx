@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useJournal } from "@/contexts/JournalContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -88,7 +89,7 @@ const ChartAnalysis = () => {
                         cx="50%"
                         cy="50%"
                         labelLine={false}
-                        outerRadius={({ viewBox }) => Math.min(viewBox.width, viewBox.height) / 2.5}
+                        outerRadius="80%"
                         fill="#8884d8"
                         dataKey="count"
                         nameKey="name"
