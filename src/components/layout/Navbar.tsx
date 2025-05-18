@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { useJournal } from "@/contexts/JournalContext";
 import ThemeToggle from "../ThemeToggle";
-import { Download } from "lucide-react";
+import { Download, FilePdf } from "lucide-react";
 
 const Navbar = () => {
   const { exportToCSV } = useJournal();
@@ -19,9 +19,10 @@ const Navbar = () => {
           <Button 
             variant="outline" 
             onClick={exportToCSV} 
-            className="hidden sm:flex"
+            className="hidden sm:flex text-xs h-8"
+            size="sm"
           >
-            <Download className="mr-2 h-4 w-4" /> Export
+            <Download className="mr-1.5 h-3.5 w-3.5" /> CSV
           </Button>
           
           <ThemeToggle />
