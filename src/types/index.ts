@@ -17,6 +17,8 @@ export interface Trade {
   result: TradeResult | null;
   gainLossPercent: number;
   comment: string;
+  beforeTradeImage?: string | null;
+  afterTradeImage?: string | null;
 }
 
 export interface Week {

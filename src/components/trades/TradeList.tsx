@@ -17,15 +17,18 @@ import {
   CheckCircle,
   XCircle,
   MinusCircle,
-  Clock
+  Clock,
+  Eye
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import TradeForm from "./TradeForm";
+import TradeDetailView from "./TradeDetailView";
 
 const TradeList = () => {
   const { journal, currentWeekId, deleteTrade } = useJournal();
   const [editingTrade, setEditingTrade] = useState<Trade | null>(null);
+  const [viewingTrade, setViewingTrade] = useState<Trade | null>(null);
 
   if (!currentWeekId) {
     return <div className="text-center py-8">No week selected</div>;
@@ -85,6 +88,14 @@ const TradeList = () => {
         />
       )}
       
+      {viewingTrade && (
+        <TradeDetailView 
+          trade={viewingTrade}
+          isOpen={true}
+          onClose={() => setViewingTrade(null)}
+        />
+      )}
+      
       <Table className="trades-table">
         <TableHeader>
           <TableRow>
@@ -111,7 +122,7 @@ const TradeList = () => {
             </TableRow>
           ) : (
             currentWeek.trades.map(trade => (
-              <TableRow key={trade.id}>
+              <TableRow key={trade.id} className="cursor-pointer hover:bg-muted/10" onClick={() => setViewingTrade(trade)}>
                 <TableCell>
                   {trade.date instanceof Date 
                     ? format(trade.date, 'dd/MM/yyyy')
@@ -133,8 +144,11 @@ const TradeList = () => {
                 <TableCell className={`text-right ${getGainLossClass(trade.gainLossPercent)}`}>
                   {trade.gainLossPercent > 0 ? '+' : ''}{trade.gainLossPercent.toFixed(2)}%
                 </TableCell>
-                <TableCell className="text-right">
+                <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                   <div className="flex justify-end space-x-1">
+                    <Button size="icon" variant="ghost" onClick={() => setViewingTrade(trade)}>
+                      <Eye className="h-4 w-4" />
+                    </Button>
                     <Button size="icon" variant="ghost" onClick={() => setEditingTrade(trade)}>
                       <Edit className="h-4 w-4" />
                     </Button>

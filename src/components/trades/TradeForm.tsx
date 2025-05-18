@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useJournal } from "@/contexts/JournalContext";
 import { Button } from "@/components/ui/button";
@@ -23,7 +22,7 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
-import { CalendarIcon, X } from "lucide-react";
+import { CalendarIcon, X, ImagePlus, Image } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type TradeFormData = Omit<Trade, "id">;
@@ -48,6 +47,8 @@ const defaultFormData: TradeFormData = {
   result: null,
   gainLossPercent: 0,
   comment: "",
+  beforeTradeImage: null,
+  afterTradeImage: null,
 };
 
 // Common currency pairs
@@ -66,6 +67,14 @@ const TradeForm = ({ weekId, initialData, onComplete, isEditing = false }: Trade
   );
   const [showCustomPair, setShowCustomPair] = useState<boolean>(
     initialData && !commonPairs.includes(initialData.pair)
+  );
+  
+  // Image preview states
+  const [beforeImagePreview, setBeforeImagePreview] = useState<string | null>(
+    initialData?.beforeTradeImage || null
+  );
+  const [afterImagePreview, setAfterImagePreview] = useState<string | null>(
+    initialData?.afterTradeImage || null
   );
 
   // Calculate Risk/Reward whenever relevant fields change
@@ -124,6 +133,39 @@ const TradeForm = ({ weekId, initialData, onComplete, isEditing = false }: Trade
         ...formData,
         [name]: value,
       });
+    }
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>, imageType: 'before' | 'after') => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    // Create a preview URL for the image
+    const imageUrl = URL.createObjectURL(file);
+    
+    // Convert the image to base64 for storage
+    const reader = new FileReader();
+    reader.onload = () => {
+      const base64String = reader.result as string;
+      
+      if (imageType === 'before') {
+        setBeforeImagePreview(imageUrl);
+        setFormData(prev => ({ ...prev, beforeTradeImage: base64String }));
+      } else {
+        setAfterImagePreview(imageUrl);
+        setFormData(prev => ({ ...prev, afterTradeImage: base64String }));
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveImage = (imageType: 'before' | 'after') => {
+    if (imageType === 'before') {
+      setBeforeImagePreview(null);
+      setFormData(prev => ({ ...prev, beforeTradeImage: null }));
+    } else {
+      setAfterImagePreview(null);
+      setFormData(prev => ({ ...prev, afterTradeImage: null }));
     }
   };
 
@@ -389,6 +431,100 @@ const TradeForm = ({ weekId, initialData, onComplete, isEditing = false }: Trade
                 className={formData.gainLossPercent > 0 ? "border-profit/40" : formData.gainLossPercent < 0 ? "border-loss/40" : ""}
               />
             </div>
+          </div>
+          
+          {/* Before Trade Image */}
+          <div className="space-y-2">
+            <Label htmlFor="beforeTradeImage">Before Trade Image</Label>
+            {beforeImagePreview ? (
+              <div className="relative">
+                <img 
+                  src={beforeImagePreview} 
+                  alt="Before Trade" 
+                  className="max-h-40 rounded-md border border-border object-contain mx-auto"
+                />
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="icon"
+                  className="absolute top-1 right-1"
+                  onClick={() => handleRemoveImage('before')}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-center justify-center w-full">
+                <label
+                  htmlFor="dropzone-before"
+                  className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted/20 border-border hover:bg-muted/30"
+                >
+                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                    <ImagePlus className="w-8 h-8 mb-2 text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">
+                      <span className="font-medium">Click to upload</span> or drag and drop
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      PNG, JPG, GIF (max 5MB)
+                    </p>
+                  </div>
+                  <Input
+                    id="dropzone-before"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => handleImageChange(e, 'before')}
+                  />
+                </label>
+              </div>
+            )}
+          </div>
+          
+          {/* After Trade Image */}
+          <div className="space-y-2">
+            <Label htmlFor="afterTradeImage">After Trade Image</Label>
+            {afterImagePreview ? (
+              <div className="relative">
+                <img 
+                  src={afterImagePreview} 
+                  alt="After Trade" 
+                  className="max-h-40 rounded-md border border-border object-contain mx-auto"
+                />
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="icon"
+                  className="absolute top-1 right-1"
+                  onClick={() => handleRemoveImage('after')}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-center justify-center w-full">
+                <label
+                  htmlFor="dropzone-after"
+                  className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted/20 border-border hover:bg-muted/30"
+                >
+                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                    <ImagePlus className="w-8 h-8 mb-2 text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">
+                      <span className="font-medium">Click to upload</span> or drag and drop
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      PNG, JPG, GIF (max 5MB)
+                    </p>
+                  </div>
+                  <Input
+                    id="dropzone-after"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => handleImageChange(e, 'after')}
+                  />
+                </label>
+              </div>
+            )}
           </div>
           
           {/* Comment */}
