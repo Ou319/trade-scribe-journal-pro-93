@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,6 +62,25 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				profit: {
+					DEFAULT: '#10b981', // Green for profits
+					light: '#d1fae5'
+				},
+				loss: {
+					DEFAULT: '#ef4444', // Red for losses
+					light: '#fee2e2'
+				},
+				neutral: {
+					DEFAULT: '#6b7280', // Gray for neutral/breakeven
+					light: '#f3f4f6'
+				},
+				chart: {
+					blue: '#3b82f6',
+					green: '#10b981',
+					red: '#ef4444',
+					yellow: '#f59e0b',
+					purple: '#8b5cf6',
 				}
 			},
 			borderRadius: {
