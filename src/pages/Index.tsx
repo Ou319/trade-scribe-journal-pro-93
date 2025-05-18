@@ -18,11 +18,11 @@ const Index = () => {
         
         <DashboardStats />
         
-        <div className="my-6">
+        <WeekDetail />
+        
+        <div className="my-8">
           <ChartAnalysis />
         </div>
-        
-        <WeekDetail />
       </main>
       
       <footer className="border-t py-4 bg-gradient-to-r from-primary/10 to-primary/5">

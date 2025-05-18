@@ -30,17 +30,17 @@ const ChartAnalysis = () => {
   // Sort pairs by profit/loss
   const profitLossPairs = [...pairAnalysis]
     .sort((a, b) => b.netResult - a.netResult)
-    .slice(0, 10); // Top 10 pairs by profit/loss
+    .slice(0, 8); // Reduced to top 8 pairs for better visibility
   
   // Process daily profit/loss data
   const dailyProfitLoss = processDailyProfitLoss(journal.weeks);
   
   return (
-    <Card className="shadow-md border-opacity-50 bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 overflow-hidden">
-      <CardHeader className="border-b pb-3">
-        <CardTitle className="text-xl font-semibold flex items-center">
-          <BarChart3 className="mr-2 h-5 w-5 text-primary" /> 
-          Trading Analysis
+    <Card className="shadow-lg border-opacity-50 overflow-hidden rounded-xl bg-gradient-to-br from-white/80 to-gray-50/90 dark:from-gray-900/90 dark:to-gray-800/80 backdrop-blur-sm">
+      <CardHeader className="border-b pb-3 bg-gradient-to-r from-background to-background/50">
+        <CardTitle className="text-xl font-medium flex items-center text-primary">
+          <BarChart3 className="mr-2 h-5 w-5" /> 
+          Trading Analytics
         </CardTitle>
       </CardHeader>
       <CardContent className="pt-5">
@@ -50,48 +50,65 @@ const ChartAnalysis = () => {
           onValueChange={setActiveTab}
           className="w-full"
         >
-          <TabsList className="grid w-full grid-cols-2 mb-6">
+          <TabsList className="grid w-full grid-cols-2 mb-6 rounded-lg">
             <TabsTrigger value="profitloss" className="flex items-center">
               <BarChart3 className="mr-2 h-4 w-4" /> Profit & Loss by Pair
             </TabsTrigger>
             <TabsTrigger value="daily" className="flex items-center">
-              <TrendingUp className="mr-2 h-4 w-4" /> Profit/Loss by Day
+              <TrendingUp className="mr-2 h-4 w-4" /> P/L Trend
             </TabsTrigger>
           </TabsList>
           
           <TabsContent value="profitloss" className="mt-4">
             {profitLossPairs.length > 0 ? (
-              <div className="h-[300px] sm:h-[350px] md:h-[400px]">
+              <div className="h-[250px] sm:h-[280px] md:h-[300px]">
                 <ChartContainer
                   config={{
-                    profit: { theme: { dark: "#10B981", light: "#10B981" } },
-                    loss: { theme: { dark: "#F43F5E", light: "#F43F5E" } },
+                    profit: { theme: { dark: "#8B5CF6", light: "#8B5CF6" } }, // Modern purple
+                    loss: { theme: { dark: "#F97316", light: "#F97316" } },   // Modern orange
                   }}
                 >
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart 
                       data={profitLossPairs}
-                      margin={{ top: 10, right: 10, left: 0, bottom: 30 }}
+                      margin={{ top: 5, right: 5, left: 0, bottom: 20 }}
                     >
-                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.1)" />
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.07)" />
                       <XAxis 
                         dataKey="name" 
                         tick={{ fontSize: 10 }} 
                         angle={-45}
                         textAnchor="end"
-                        height={70}
+                        height={60}
                       />
                       <YAxis tick={{ fontSize: 10 }} />
-                      <ChartTooltip content={<ChartTooltipContent />} />
-                      <Legend wrapperStyle={{ paddingTop: 15 }} />
-                      <Bar dataKey="profit" name="Profit %" fill="#10B981" radius={[4, 4, 0, 0]} />
-                      <Bar dataKey="loss" name="Loss %" fill="#F43F5E" radius={[4, 4, 0, 0]} />
+                      <ChartTooltip 
+                        content={<ChartTooltipContent />} 
+                        cursor={{ fill: 'rgba(0, 0, 0, 0.05)' }}
+                      />
+                      <Legend wrapperStyle={{ paddingTop: 10 }} />
+                      <Bar 
+                        dataKey="profit" 
+                        name="Profit %" 
+                        fill="#8B5CF6" 
+                        radius={[4, 4, 0, 0]}
+                        animationDuration={800}
+                        animationEasing="ease-in-out"
+                      />
+                      <Bar 
+                        dataKey="loss" 
+                        name="Loss %" 
+                        fill="#F97316" 
+                        radius={[4, 4, 0, 0]}
+                        animationDuration={800}
+                        animationEasing="ease-in-out"
+                      />
                     </BarChart>
                   </ResponsiveContainer>
                 </ChartContainer>
               </div>
             ) : (
-              <div className="text-center py-10 text-muted-foreground">
+              <div className="text-center py-8 text-muted-foreground">
                 No profit/loss data available. Add some completed trades to see the chart.
               </div>
             )}
@@ -99,90 +116,92 @@ const ChartAnalysis = () => {
           
           <TabsContent value="daily" className="mt-4">
             {dailyProfitLoss.length > 0 ? (
-              <div className="h-[300px] sm:h-[350px] md:h-[400px]">
+              <div className="h-[240px] sm:h-[280px] md:h-[300px]">
                 <ChartContainer
                   config={{
-                    value: { theme: { dark: "#3b82f6", light: "#3b82f6" } },
+                    value: { theme: { dark: "#0EA5E9", light: "#0EA5E9" } }, // Modern blue
                   }}
                 >
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart 
                       data={dailyProfitLoss}
-                      margin={{ top: 10, right: 10, left: 0, bottom: 30 }}
+                      margin={{ top: 5, right: 5, left: 0, bottom: 20 }}
                     >
-                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.1)" />
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.07)" />
                       <XAxis 
                         dataKey="date" 
                         tick={{ fontSize: 10 }}
                         angle={-45}
                         textAnchor="end"
-                        height={70}
+                        height={60}
                       />
                       <YAxis tick={{ fontSize: 10 }} />
                       <ChartTooltip content={<ChartTooltipContent nameKey="date" />} />
                       <Line 
                         type="monotone" 
                         dataKey="value" 
-                        stroke="#3b82f6" 
-                        strokeWidth={2}
-                        dot={{ r: 3, fill: "#3b82f6" }}
-                        activeDot={{ r: 5, fill: "#3b82f6", stroke: "#fff" }}
+                        stroke="#0EA5E9" 
+                        strokeWidth={2.5}
+                        dot={{ r: 3, fill: "#0EA5E9", strokeWidth: 1, stroke: "#fff" }}
+                        activeDot={{ r: 5, fill: "#0EA5E9", stroke: "#fff" }}
                         name="Profit/Loss %"
+                        animationDuration={1200}
+                        animationEasing="ease-out"
                       />
                     </LineChart>
                   </ResponsiveContainer>
                 </ChartContainer>
               </div>
             ) : (
-              <div className="text-center py-10 text-muted-foreground">
+              <div className="text-center py-8 text-muted-foreground">
                 No daily profit/loss data available. Add some completed trades to see the chart.
               </div>
             )}
           </TabsContent>
         </Tabs>
 
-        <div className="mt-6 pt-4 border-t">
-          <h3 className="text-sm font-semibold text-muted-foreground mb-2">Total Profit/Loss by Day</h3>
-          <div className="h-[180px] sm:h-[200px]">
+        <div className="mt-6 pt-4 border-t border-t-border/30">
+          <h3 className="text-sm font-medium text-primary/80 mb-2">Daily P&L Summary</h3>
+          <div className="h-[150px]">
             {dailyProfitLoss.length > 0 ? (
               <ChartContainer
                 config={{
-                  value: { theme: { dark: "#10B981", light: "#10B981" } },
-                  negative: { theme: { dark: "#F43F5E", light: "#F43F5E" } },
+                  positive: { theme: { dark: "#8B5CF6", light: "#8B5CF6" } }, // Purple for positive
+                  negative: { theme: { dark: "#D946EF", light: "#D946EF" } }, // Magenta for negative
                 }}
               >
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart 
                     data={dailyProfitLoss}
-                    margin={{ top: 5, right: 5, left: 0, bottom: 25 }}
+                    margin={{ top: 5, right: 5, left: 0, bottom: 20 }}
                   >
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.1)" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.05)" />
                     <XAxis 
                       dataKey="date" 
-                      tick={{ fontSize: 9 }}
+                      tick={{ fontSize: 8 }}
                       angle={-45}
                       textAnchor="end"
-                      height={50}
+                      height={40}
                     />
                     <YAxis tick={{ fontSize: 9 }} />
                     <ChartTooltip content={<ChartTooltipContent nameKey="date" />} />
                     <Bar 
                       dataKey="value" 
                       name="Daily P/L" 
-                      fill="#10B981"
-                      radius={[4, 4, 0, 0]}
+                      radius={[3, 3, 0, 0]}
                       isAnimationActive={true}
-                      animationDuration={1000}
+                      animationDuration={800}
+                      animationEasing="ease-in-out"
                       shape={(props) => {
-                        // Determine color based on value
-                        const fill = props.value >= 0 ? "#10B981" : "#F43F5E";
+                        const fill = props.value >= 0 ? "#8B5CF6" : "#D946EF";
                         return <rect 
                           x={props.x} 
                           y={props.value >= 0 ? props.y : props.y - props.height} 
                           width={props.width} 
                           height={Math.abs(props.height)} 
                           fill={fill} 
-                          radius={[4, 4, 0, 0]}
+                          rx={3}
+                          ry={3}
                         />
                       }}
                     />
@@ -190,7 +209,7 @@ const ChartAnalysis = () => {
                 </ResponsiveContainer>
               </ChartContainer>
             ) : (
-              <div className="text-center py-10 text-muted-foreground">
+              <div className="text-center py-8 text-muted-foreground">
                 No daily profit/loss data available.
               </div>
             )}
