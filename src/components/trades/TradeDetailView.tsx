@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Trade } from "@/types";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { CheckCircle, XCircle, MinusCircle, Clock, Image } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { toast } from "@/hooks/use-toast";
 
 interface TradeDetailViewProps {
   trade: Trade;
@@ -15,6 +16,15 @@ interface TradeDetailViewProps {
 }
 
 const TradeDetailView = ({ trade, isOpen, onClose }: TradeDetailViewProps) => {
+  useEffect(() => {
+    if (isOpen) {
+      toast({
+        title: "Trade details loaded",
+        description: `Viewing details for ${trade.pair} trade`,
+      });
+    }
+  }, [isOpen, trade.pair]);
+
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-[700px]">
