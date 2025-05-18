@@ -4,6 +4,7 @@ import Navbar from "@/components/layout/Navbar";
 import DashboardStats from "@/components/dashboard/DashboardStats";
 import ChartAnalysis from "@/components/dashboard/ChartAnalysis";
 import WeekDetail from "@/components/weeks/WeekDetail";
+import CapitalDisplay from "@/components/dashboard/CapitalDisplay";
 
 const Index = () => {
   const { stats } = useJournal();
@@ -13,6 +14,8 @@ const Index = () => {
       <Navbar />
       
       <main className="flex-1 container mx-auto px-4 py-8">
+        <CapitalDisplay />
+        
         <DashboardStats />
         
         <div className="my-6">
