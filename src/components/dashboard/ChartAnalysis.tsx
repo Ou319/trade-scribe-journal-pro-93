@@ -5,8 +5,6 @@ import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, L
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChartLine, ChartBar, TrendingUp, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import html2canvas from "html2canvas";
-import jsPDF from "jspdf";
 
 type PairAnalysis = {
   name: string;

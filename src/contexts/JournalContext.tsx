@@ -2,9 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Trade, Week, TradeJournal, DashboardStats, TradeType, TradeResult, TradeStatus } from '@/types';
 import { toast } from 'sonner';
 import jsPDF from 'jspdf';
-// Import jspdf-autotable correctly
 import 'jspdf-autotable';
-import html2canvas from 'html2canvas';
 
 interface JournalContextType {
   journal: TradeJournal;
@@ -22,7 +20,7 @@ interface JournalContextType {
   exportToPDF: () => void;
 }
 
-// Create the context with a default value of undefined
+// Create the context
 const JournalContext = createContext<JournalContextType | undefined>(undefined);
 
 // Generate a simple ID for our entities
@@ -342,7 +340,7 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   };
   
-  // Export comprehensive report as PDF
+  // Export comprehensive report as PDF - simplified implementation
   const exportToPDF = () => {
     try {
       // Initialize PDF document with A4 portrait format
@@ -352,7 +350,7 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
         format: 'a4'
       });
       
-      // Add header with logo and title
+      // Add header with title
       pdf.setFillColor(245, 245, 245);
       pdf.rect(0, 0, pdf.internal.pageSize.getWidth(), 25, 'F');
       pdf.setTextColor(40, 40, 40);
@@ -384,8 +382,9 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
         ["Avg Risk/Reward", stats.riskRewardAverage.toFixed(2)]
       ];
       
-      // Use autoTable from jspdf-autotable correctly
-      (pdf as any).autoTable({
+      // Add the table to the PDF
+      const autoTable = require('jspdf-autotable').default;
+      autoTable(pdf, {
         head: [tableColumn],
         body: tableRows,
         startY: 40,
@@ -440,8 +439,8 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
             `${trade.gainLossPercent.toFixed(2)}%`
           ]);
           
-          // Use autoTable from jspdf-autotable correctly
-          (pdf as any).autoTable({
+          // Add the trades table
+          autoTable(pdf, {
             head: [tradeColumns],
             body: tradeRows,
             startY: yPosition + 5,
@@ -458,8 +457,8 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
             margin: { top: 30, right: 15, bottom: 15, left: 15 }
           });
           
-          // Update Y position after the table
-          yPosition = (pdf as any).previousAutoTable.finalY + 15;
+          // Get the final Y position from the table
+          yPosition = (pdf as any).lastAutoTable.finalY + 15;
         } else {
           pdf.setFont('helvetica', 'italic');
           pdf.setFontSize(10);
@@ -474,34 +473,8 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
         }
       });
       
-      // Try to capture the chart and add it to the PDF
-      const chartElement = document.querySelector('[data-chart]') as HTMLElement;
-      if (chartElement) {
-        try {
-          html2canvas(chartElement, { scale: 2 }).then(canvas => {
-            const imgWidth = 180;
-            const imgHeight = (canvas.height * imgWidth) / canvas.width;
-            const imgData = canvas.toDataURL('image/png');
-            
-            pdf.addPage();
-            pdf.setFontSize(16);
-            pdf.setFont('helvetica', 'bold');
-            pdf.text('Trading Performance Charts', 15, 15);
-            
-            pdf.addImage(imgData, 'PNG', 15, 25, imgWidth, imgHeight);
-            
-            // Save the PDF after chart is captured
-            pdf.save(`YTR_Trading_Journal_${new Date().toISOString().split('T')[0]}.pdf`);
-          });
-        } catch (chartError) {
-          console.error("Error capturing chart:", chartError);
-          // Save PDF even if chart capture fails
-          pdf.save(`YTR_Trading_Journal_${new Date().toISOString().split('T')[0]}.pdf`);
-        }
-      } else {
-        // Save PDF if chart element doesn't exist
-        pdf.save(`YTR_Trading_Journal_${new Date().toISOString().split('T')[0]}.pdf`);
-      }
+      // Save the PDF
+      pdf.save(`YTR_Trading_Journal_${new Date().toISOString().split('T')[0]}.pdf`);
       
       toast.success("Report exported to PDF");
     } catch (error) {
