@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Trade, Week, TradeJournal, DashboardStats, TradeType, TradeResult, TradeStatus } from '@/types';
 import { toast } from 'sonner';
@@ -8,6 +7,7 @@ import { jsPDF as jsPDFType } from 'jspdf';
 // Define a type that includes autoTable method
 interface jsPDFWithAutoTable extends jsPDFType {
   autoTable: any;
+  previousAutoTable?: { finalY?: number };
 }
 
 interface JournalContextType {
@@ -408,6 +408,9 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
           margin: { top: 30 }
         });
         
+        // Get the final Y position from the table
+        let yPosition = pdf.previousAutoTable?.finalY || 60;
+        
         // Add a page break after the summary
         pdf.addPage();
         
@@ -416,7 +419,7 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
         pdf.setFont('helvetica', 'bold');
         pdf.text('Trading Details by Week', 15, 15);
         
-        let yPosition = 25;
+        yPosition = 25;
         
         // Loop through each week
         journal.weeks.forEach((week, weekIndex) => {
@@ -464,8 +467,8 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
               margin: { top: 30, right: 15, bottom: 15, left: 15 }
             });
             
-            // Calculate the final Y position
-            yPosition = pdf.lastAutoTable.finalY + 15;
+            // Update Y position for next content
+            yPosition = pdf.previousAutoTable?.finalY ? pdf.previousAutoTable.finalY + 15 : yPosition + 20;
           } else {
             pdf.setFont('helvetica', 'italic');
             pdf.setFontSize(10);
