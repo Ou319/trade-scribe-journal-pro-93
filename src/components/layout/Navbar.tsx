@@ -2,10 +2,10 @@
 import { Button } from "@/components/ui/button";
 import { useJournal } from "@/contexts/JournalContext";
 import ThemeToggle from "../ThemeToggle";
-import { Download, FileText } from "lucide-react";
+import { FileText } from "lucide-react";
 
 const Navbar = () => {
-  const { exportToCSV } = useJournal();
+  const { exportToPDF } = useJournal();
 
   return (
     <header className="border-b">
@@ -18,11 +18,11 @@ const Navbar = () => {
         <div className="flex items-center space-x-2">
           <Button 
             variant="outline" 
-            onClick={exportToCSV} 
+            onClick={exportToPDF} 
             className="hidden sm:flex text-xs h-8"
             size="sm"
           >
-            <Download className="mr-1.5 h-3.5 w-3.5" /> CSV
+            <FileText className="mr-1.5 h-3.5 w-3.5" /> Export Report
           </Button>
           
           <ThemeToggle />
