@@ -1,9 +1,10 @@
-import { useState } from "react";
+
+import { useState, useRef } from "react";
 import { useJournal } from "@/contexts/JournalContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area } from "recharts";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ChartLine, ChartBar, TrendingUp, Download, FilePdf } from "lucide-react";
+import { ChartLine, ChartBar, TrendingUp, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
@@ -24,7 +25,7 @@ type DailyProfitLoss = {
 const ChartAnalysis = () => {
   const { journal } = useJournal();
   const [activeTab, setActiveTab] = useState("profitloss");
-  const chartRef = useState<HTMLDivElement | null>(null);
+  const chartRef = useRef<HTMLDivElement>(null);
   
   // Process data for the charts
   const pairAnalysis = processPairData(journal.weeks);
@@ -106,7 +107,7 @@ const ChartAnalysis = () => {
             className="flex items-center text-xs gap-1 h-8"
             onClick={exportToPDF}
           >
-            <FilePdf className="h-3.5 w-3.5" />
+            <FileText className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">Export PDF</span>
           </Button>
         </div>

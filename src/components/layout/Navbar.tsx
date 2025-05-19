@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { useJournal } from "@/contexts/JournalContext";
 import ThemeToggle from "../ThemeToggle";
-import { Download, FilePdf } from "lucide-react";
+import { Download, FileText } from "lucide-react";
 
 const Navbar = () => {
   const { exportToCSV } = useJournal();
