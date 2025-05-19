@@ -1,4 +1,3 @@
-
 import { useState, useRef } from "react";
 import { useJournal } from "@/contexts/JournalContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,7 +22,7 @@ type DailyProfitLoss = {
 };
 
 const ChartAnalysis = () => {
-  const { journal } = useJournal();
+  const { journal, exportToPDF } = useJournal();
   const [activeTab, setActiveTab] = useState("profitloss");
   const chartRef = useRef<HTMLDivElement>(null);
   
@@ -40,58 +39,6 @@ const ChartAnalysis = () => {
 
   // Generate candlestick data from real trade data
   const candlestickData = generateCandlestickData(journal.weeks);
-  
-  const exportToPDF = async () => {
-    if (!chartRef.current) return;
-
-    try {
-      const canvas = await html2canvas(chartRef.current, {
-        scale: 2,
-        backgroundColor: null,
-        logging: false,
-      });
-      
-      const imgData = canvas.toDataURL('image/png');
-      
-      const pdf = new jsPDF({
-        orientation: 'landscape',
-        unit: 'mm',
-        format: 'a4',
-      });
-      
-      // Add title and header
-      pdf.setFillColor(245, 245, 245);
-      pdf.rect(0, 0, pdf.internal.pageSize.getWidth(), 20, 'F');
-      pdf.setFontSize(16);
-      pdf.setTextColor(40, 40, 40);
-      pdf.text('YTR - Trading Journal Report', 14, 10);
-      pdf.setFontSize(10);
-      pdf.setTextColor(100, 100, 100);
-      pdf.text(`Generated: ${new Date().toLocaleDateString()}`, pdf.internal.pageSize.getWidth() - 60, 10);
-      
-      // Add trading statistics
-      const { stats } = useJournal();
-      pdf.setFontSize(12);
-      pdf.setTextColor(40, 40, 40);
-      pdf.text('Trading Performance Summary', 14, 30);
-      
-      pdf.setFontSize(10);
-      pdf.text(`Total Trades: ${stats.totalTrades}`, 14, 40);
-      pdf.text(`Win Rate: ${stats.winRate.toFixed(2)}%`, 14, 46);
-      pdf.text(`Profit/Loss: ${stats.totalProfitLossPercent.toFixed(2)}%`, 14, 52);
-      pdf.text(`Risk/Reward Avg: ${stats.riskRewardAverage.toFixed(2)}`, 14, 58);
-      
-      // Add chart image
-      const imgWidth = 260;
-      const imgHeight = canvas.height * imgWidth / canvas.width;
-      pdf.addImage(imgData, 'PNG', 14, 70, imgWidth, imgHeight);
-      
-      // Save PDF
-      pdf.save(`YTR_Trading_Journal_${new Date().toISOString().split('T')[0]}.pdf`);
-    } catch (error) {
-      console.error("Error generating PDF:", error);
-    }
-  };
   
   return (
     <Card className="shadow-sm border-opacity-50 overflow-hidden rounded-xl bg-gradient-to-b from-card to-card/80 dark:from-gray-900 dark:to-gray-950">
@@ -131,7 +78,7 @@ const ChartAnalysis = () => {
             </TabsTrigger>
           </TabsList>
           
-          <div ref={chartRef}>
+          <div ref={chartRef} data-chart>
             <TabsContent value="profitloss" className="mt-2">
               {profitLossPairs.length > 0 ? (
                 <div className="h-[150px] sm:h-[180px] md:h-[200px]">

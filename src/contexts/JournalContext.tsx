@@ -1,8 +1,8 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Trade, Week, TradeJournal, DashboardStats, TradeType, TradeResult, TradeStatus } from '@/types';
 import { toast } from 'sonner';
 import jsPDF from 'jspdf';
+// Import jspdf-autotable correctly
 import 'jspdf-autotable';
 import html2canvas from 'html2canvas';
 
@@ -384,8 +384,8 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
         ["Avg Risk/Reward", stats.riskRewardAverage.toFixed(2)]
       ];
       
-      // @ts-ignore - autotable is added via import
-      pdf.autoTable({
+      // Use autoTable from jspdf-autotable correctly
+      (pdf as any).autoTable({
         head: [tableColumn],
         body: tableRows,
         startY: 40,
@@ -440,8 +440,8 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
             `${trade.gainLossPercent.toFixed(2)}%`
           ]);
           
-          // @ts-ignore - autotable is added via import
-          pdf.autoTable({
+          // Use autoTable from jspdf-autotable correctly
+          (pdf as any).autoTable({
             head: [tradeColumns],
             body: tradeRows,
             startY: yPosition + 5,
@@ -459,8 +459,7 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
           });
           
           // Update Y position after the table
-          // @ts-ignore - autotable is added via import
-          yPosition = pdf.previousAutoTable.finalY + 15;
+          yPosition = (pdf as any).previousAutoTable.finalY + 15;
         } else {
           pdf.setFont('helvetica', 'italic');
           pdf.setFontSize(10);
