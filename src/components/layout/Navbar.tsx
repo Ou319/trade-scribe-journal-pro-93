@@ -19,10 +19,10 @@ const Navbar = () => {
           <Button 
             variant="outline" 
             onClick={exportToPDF} 
-            className="hidden sm:flex text-xs h-8"
+            className="flex text-xs h-8"
             size="sm"
           >
-            <FileText className="mr-1.5 h-3.5 w-3.5" /> Export Report
+            <FileText className="mr-1.5 h-3.5 w-3.5" /> Export PDF
           </Button>
           
           <ThemeToggle />

@@ -1,8 +1,14 @@
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Trade, Week, TradeJournal, DashboardStats, TradeType, TradeResult, TradeStatus } from '@/types';
 import { toast } from 'sonner';
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import { jsPDF as jsPDFType } from 'jspdf';
+
+// Define a type that includes autoTable method
+interface jsPDFWithAutoTable extends jsPDFType {
+  autoTable: any;
+}
 
 interface JournalContextType {
   journal: TradeJournal;
@@ -348,135 +354,140 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
         orientation: 'portrait',
         unit: 'mm',
         format: 'a4'
-      });
+      }) as jsPDFWithAutoTable;
       
-      // Add header with title
-      pdf.setFillColor(245, 245, 245);
-      pdf.rect(0, 0, pdf.internal.pageSize.getWidth(), 25, 'F');
-      pdf.setTextColor(40, 40, 40);
-      pdf.setFontSize(20);
-      pdf.setFont('helvetica', 'bold');
-      pdf.text('YTR - Trading Journal Report', 15, 15);
-      
-      // Add subtitle with date
-      pdf.setTextColor(100, 100, 100);
-      pdf.setFontSize(10);
-      pdf.setFont('helvetica', 'normal');
-      pdf.text(`Generated on ${new Date().toLocaleDateString()}`, pdf.internal.pageSize.getWidth() - 60, 15);
-      
-      // Add overall statistics section
-      pdf.setTextColor(40, 40, 40);
-      pdf.setFontSize(16);
-      pdf.setFont('helvetica', 'bold');
-      pdf.text('Trading Performance Summary', 15, 35);
-      
-      // Create stats table
-      const tableColumn = ["Metric", "Value"];
-      const tableRows = [
-        ["Total Trades", stats.totalTrades.toString()],
-        ["Win Rate", `${stats.winRate.toFixed(2)}%`],
-        ["Win Trades", stats.winTrades.toString()],
-        ["Loss Trades", stats.loseTrades.toString()],
-        ["Breakeven Trades", stats.breakevenTrades.toString()],
-        ["Total P/L", `${stats.totalProfitLossPercent.toFixed(2)}%`],
-        ["Avg Risk/Reward", stats.riskRewardAverage.toFixed(2)]
-      ];
-      
-      // Add the table to the PDF
-      const autoTable = require('jspdf-autotable').default;
-      autoTable(pdf, {
-        head: [tableColumn],
-        body: tableRows,
-        startY: 40,
-        theme: 'striped',
-        headStyles: {
-          fillColor: [59, 130, 246], // blue-500
-          textColor: [255, 255, 255],
-          fontStyle: 'bold'
-        },
-        styles: {
-          cellPadding: 3,
-          fontSize: 10
-        },
-        margin: { top: 30 }
-      });
-      
-      // Add a page break after the summary
-      pdf.addPage();
-      
-      // Add trades detail section
-      pdf.setFontSize(16);
-      pdf.setFont('helvetica', 'bold');
-      pdf.text('Trading Details by Week', 15, 15);
-      
-      let yPosition = 25;
-      
-      // Loop through each week
-      journal.weeks.forEach((week, weekIndex) => {
-        // Add page break if needed
-        if (yPosition > pdf.internal.pageSize.getHeight() - 60) {
-          pdf.addPage();
-          yPosition = 15;
-        }
-        
+      // Load the autoTable plugin
+      import('jspdf-autotable').then(({ default: autoTable }) => {
+        // Add header with title
+        pdf.setFillColor(245, 245, 245);
+        pdf.rect(0, 0, pdf.internal.pageSize.getWidth(), 25, 'F');
+        pdf.setTextColor(40, 40, 40);
+        pdf.setFontSize(20);
         pdf.setFont('helvetica', 'bold');
-        pdf.setFontSize(14);
-        pdf.text(`${week.name} (${week.percentGain.toFixed(2)}%)`, 15, yPosition);
-        yPosition += 5;
+        pdf.text('YTR - Trading Journal Report', 15, 15);
         
-        // Prepare trade data for this week
-        if (week.trades.length > 0) {
-          const tradeColumns = ["Date", "Pair", "Type", "Entry", "SL", "TP", "Status", "Result", "P/L %"];
-          const tradeRows = week.trades.map(trade => [
-            trade.date instanceof Date ? trade.date.toLocaleDateString() : new Date(trade.date).toLocaleDateString(),
-            trade.pair,
-            trade.type,
-            trade.entry.toString(),
-            trade.stopLoss.toString(),
-            trade.takeProfit.toString(),
-            trade.status,
-            trade.result || "-",
-            `${trade.gainLossPercent.toFixed(2)}%`
-          ]);
-          
-          // Add the trades table
-          autoTable(pdf, {
-            head: [tradeColumns],
-            body: tradeRows,
-            startY: yPosition + 5,
-            theme: 'grid',
-            headStyles: {
-              fillColor: [100, 116, 139], // slate-500
-              textColor: [255, 255, 255],
-              fontStyle: 'bold'
-            },
-            styles: {
-              cellPadding: 2,
-              fontSize: 8
-            },
-            margin: { top: 30, right: 15, bottom: 15, left: 15 }
-          });
-          
-          // Get the final Y position from the table
-          yPosition = (pdf as any).lastAutoTable.finalY + 15;
-        } else {
-          pdf.setFont('helvetica', 'italic');
-          pdf.setFontSize(10);
-          pdf.text("No trades recorded for this week", 20, yPosition + 10);
-          yPosition += 20;
-        }
+        // Add subtitle with date
+        pdf.setTextColor(100, 100, 100);
+        pdf.setFontSize(10);
+        pdf.setFont('helvetica', 'normal');
+        pdf.text(`Generated on ${new Date().toLocaleDateString()}`, pdf.internal.pageSize.getWidth() - 60, 15);
         
-        // Add page break between weeks if not the last week
-        if (weekIndex < journal.weeks.length - 1) {
-          pdf.addPage();
-          yPosition = 15;
-        }
+        // Add overall statistics section
+        pdf.setTextColor(40, 40, 40);
+        pdf.setFontSize(16);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('Trading Performance Summary', 15, 35);
+        
+        // Create stats table
+        const tableColumn = ["Metric", "Value"];
+        const tableRows = [
+          ["Total Trades", stats.totalTrades.toString()],
+          ["Win Rate", `${stats.winRate.toFixed(2)}%`],
+          ["Win Trades", stats.winTrades.toString()],
+          ["Loss Trades", stats.loseTrades.toString()],
+          ["Breakeven Trades", stats.breakevenTrades.toString()],
+          ["Total P/L", `${stats.totalProfitLossPercent.toFixed(2)}%`],
+          ["Avg Risk/Reward", stats.riskRewardAverage.toFixed(2)]
+        ];
+        
+        // Add the table to the PDF
+        autoTable(pdf, {
+          head: [tableColumn],
+          body: tableRows,
+          startY: 40,
+          theme: 'striped',
+          headStyles: {
+            fillColor: [59, 130, 246], // blue-500
+            textColor: [255, 255, 255],
+            fontStyle: 'bold'
+          },
+          styles: {
+            cellPadding: 3,
+            fontSize: 10
+          },
+          margin: { top: 30 }
+        });
+        
+        // Add a page break after the summary
+        pdf.addPage();
+        
+        // Add trades detail section
+        pdf.setFontSize(16);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('Trading Details by Week', 15, 15);
+        
+        let yPosition = 25;
+        
+        // Loop through each week
+        journal.weeks.forEach((week, weekIndex) => {
+          // Add page break if needed
+          if (yPosition > pdf.internal.pageSize.getHeight() - 60) {
+            pdf.addPage();
+            yPosition = 15;
+          }
+          
+          pdf.setFont('helvetica', 'bold');
+          pdf.setFontSize(14);
+          pdf.text(`${week.name} (${week.percentGain.toFixed(2)}%)`, 15, yPosition);
+          yPosition += 5;
+          
+          // Prepare trade data for this week
+          if (week.trades.length > 0) {
+            const tradeColumns = ["Date", "Pair", "Type", "Entry", "SL", "TP", "Status", "Result", "P/L %"];
+            const tradeRows = week.trades.map(trade => [
+              trade.date instanceof Date ? trade.date.toLocaleDateString() : new Date(trade.date).toLocaleDateString(),
+              trade.pair,
+              trade.type,
+              trade.entry.toString(),
+              trade.stopLoss.toString(),
+              trade.takeProfit.toString(),
+              trade.status,
+              trade.result || "-",
+              `${trade.gainLossPercent.toFixed(2)}%`
+            ]);
+            
+            // Add the trades table
+            autoTable(pdf, {
+              head: [tradeColumns],
+              body: tradeRows,
+              startY: yPosition + 5,
+              theme: 'grid',
+              headStyles: {
+                fillColor: [100, 116, 139], // slate-500
+                textColor: [255, 255, 255],
+                fontStyle: 'bold'
+              },
+              styles: {
+                cellPadding: 2,
+                fontSize: 8
+              },
+              margin: { top: 30, right: 15, bottom: 15, left: 15 }
+            });
+            
+            // Calculate the final Y position
+            yPosition = pdf.lastAutoTable.finalY + 15;
+          } else {
+            pdf.setFont('helvetica', 'italic');
+            pdf.setFontSize(10);
+            pdf.text("No trades recorded for this week", 20, yPosition + 10);
+            yPosition += 20;
+          }
+          
+          // Add page break between weeks if not the last week
+          if (weekIndex < journal.weeks.length - 1) {
+            pdf.addPage();
+            yPosition = 15;
+          }
+        });
+        
+        // Save the PDF
+        pdf.save(`YTR_Trading_Journal_${new Date().toISOString().split('T')[0]}.pdf`);
+        
+        toast.success("Report exported to PDF");
+      }).catch(err => {
+        console.error("Error loading jspdf-autotable:", err);
+        toast.error("Error exporting report to PDF");
       });
-      
-      // Save the PDF
-      pdf.save(`YTR_Trading_Journal_${new Date().toISOString().split('T')[0]}.pdf`);
-      
-      toast.success("Report exported to PDF");
     } catch (error) {
       console.error("Error exporting to PDF:", error);
       toast.error("Error exporting report to PDF");

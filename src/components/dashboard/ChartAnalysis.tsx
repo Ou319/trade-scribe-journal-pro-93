@@ -3,8 +3,7 @@ import { useJournal } from "@/contexts/JournalContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area } from "recharts";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ChartLine, ChartBar, TrendingUp, FileText } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { ChartLine, ChartBar, TrendingUp } from "lucide-react";
 
 type PairAnalysis = {
   name: string;
@@ -20,7 +19,7 @@ type DailyProfitLoss = {
 };
 
 const ChartAnalysis = () => {
-  const { journal, exportToPDF } = useJournal();
+  const { journal } = useJournal();
   const [activeTab, setActiveTab] = useState("profitloss");
   const chartRef = useRef<HTMLDivElement>(null);
   
@@ -46,15 +45,6 @@ const ChartAnalysis = () => {
             <ChartLine className="h-5 w-5" strokeWidth={2.5} /> 
             Trading Performance
           </CardTitle>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="flex items-center text-xs gap-1 h-8"
-            onClick={exportToPDF}
-          >
-            <FileText className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Export PDF</span>
-          </Button>
         </div>
       </CardHeader>
       <CardContent className="p-2 sm:p-3">
