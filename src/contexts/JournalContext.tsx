@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Trade, Week, TradeJournal, DashboardStats, TradeType, TradeResult, TradeStatus } from '@/types';
 import { toast } from 'sonner';
@@ -20,6 +21,9 @@ interface JournalContextType {
   exportToCSV: () => void;
   exportToPDF: () => void;
 }
+
+// Create the context with a default value of undefined
+const JournalContext = createContext<JournalContextType | undefined>(undefined);
 
 // Generate a simple ID for our entities
 const generateId = () => Math.random().toString(36).substring(2, 11);
@@ -374,7 +378,7 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
         ["Total Trades", stats.totalTrades.toString()],
         ["Win Rate", `${stats.winRate.toFixed(2)}%`],
         ["Win Trades", stats.winTrades.toString()],
-        ["Loss Trades", stats.lossTrades.toString()],
+        ["Loss Trades", stats.loseTrades.toString()],
         ["Breakeven Trades", stats.breakevenTrades.toString()],
         ["Total P/L", `${stats.totalProfitLossPercent.toFixed(2)}%`],
         ["Avg Risk/Reward", stats.riskRewardAverage.toFixed(2)]
