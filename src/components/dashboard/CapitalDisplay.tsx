@@ -8,7 +8,17 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { toast } from "sonner";
 import { DollarSign } from "lucide-react";
 
-const CapitalDisplay = () => {
+interface CapitalDisplayProps {
+  initialCapitalLabel?: string;
+  currentCapitalLabel?: string;
+  editButtonText?: string;
+}
+
+const CapitalDisplay = ({
+  initialCapitalLabel = "Initial Capital",
+  currentCapitalLabel = "Current Capital",
+  editButtonText = "Edit"
+}: CapitalDisplayProps) => {
   const { journal, stats } = useJournal();
   const [capital, setCapital] = useState<number | null>(null);
   const [showDialog, setShowDialog] = useState(false);
@@ -61,7 +71,7 @@ const CapitalDisplay = () => {
                   <DollarSign className="h-6 w-6 text-primary" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Initial Capital</p>
+                  <p className="text-sm font-medium text-muted-foreground">{initialCapitalLabel}</p>
                   <h2 className="text-2xl font-bold">{formatCurrency(capital)}</h2>
                 </div>
               </div>
@@ -71,7 +81,7 @@ const CapitalDisplay = () => {
                   <DollarSign className="h-6 w-6 text-primary" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Current Capital</p>
+                  <p className="text-sm font-medium text-muted-foreground">{currentCapitalLabel}</p>
                   <h2 className={`text-2xl font-bold ${currentCapital && currentCapital > capital ? 'text-profit' : currentCapital && currentCapital < capital ? 'text-loss' : ''}`}>
                     {currentCapital !== null ? formatCurrency(currentCapital) : 'N/A'}
                   </h2>
@@ -87,7 +97,7 @@ const CapitalDisplay = () => {
                   className="ml-auto"
                   onClick={() => setShowDialog(true)}
                 >
-                  Edit
+                  {editButtonText}
                 </Button>
               </div>
             </div>
