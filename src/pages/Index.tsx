@@ -2,9 +2,9 @@
 import { useJournal } from "@/contexts/JournalContext";
 import Navbar from "@/components/layout/Navbar";
 import DashboardStats from "@/components/dashboard/DashboardStats";
-import ChartAnalysis from "@/components/dashboard/ChartAnalysis";
 import WeekDetail from "@/components/weeks/WeekDetail";
 import CapitalDisplay from "@/components/dashboard/CapitalDisplay";
+import PerformanceChart from "@/components/charts/PerformanceChart";
 import { useEffect, useState } from "react";
 
 const Index = () => {
@@ -15,7 +15,8 @@ const Index = () => {
     ownerName: "Outmane El ouaafa",
     initialCapitalLabel: "Initial Capital",
     currentCapitalLabel: "Current Capital",
-    editButtonText: "Edit"
+    editButtonText: "Edit",
+    chartTitle: "Trading Performance"
   });
 
   useEffect(() => {
@@ -47,13 +48,11 @@ const Index = () => {
           {/* Dashboard Stats */}
           <DashboardStats />
           
+          {/* Performance Chart */}
+          <PerformanceChart title={settings.chartTitle} />
+          
           {/* Week Detail */}
           <WeekDetail />
-          
-          {/* Settings Card */}
-          <div className="mb-4">
-            <ChartAnalysis />
-          </div>
         </div>
       </main>
       
