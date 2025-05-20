@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Trade, Week, TradeJournal, DashboardStats, TradeType, TradeResult, TradeStatus } from '@/types';
 import { toast } from 'sonner';
@@ -28,9 +27,6 @@ interface JournalContextType {
   exportToPDF: () => void;
 }
 
-// Create the context
-const JournalContext = createContext<JournalContextType | undefined>(undefined);
-
 // Generate a simple ID for our entities
 const generateId = () => Math.random().toString(36).substring(2, 11);
 
@@ -57,6 +53,9 @@ const defaultStats: DashboardStats = {
   riskRewardAverage: 0,
   totalProfitLossPercent: 0,
 };
+
+// Create the context
+const JournalContext = createContext<JournalContextType | undefined>(undefined);
 
 export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [journal, setJournal] = useState<TradeJournal>(defaultJournal);
@@ -484,55 +483,7 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
           }
         });
         
-        // Draw mock charts - this would be replaced with actual chart data in a real implementation
-        pdf.setDrawColor(200, 200, 200);
-        pdf.setFillColor(240, 240, 240);
-        pdf.roundedRect(15, 70, 85, 60, 3, 3, 'FD');
-        pdf.setFontSize(10);
-        pdf.text('Win/Loss Distribution', 57.5, 75, { align: 'center' });
-        
-        // Draw mock win/loss bars
-        const winHeight = 30 * (stats.winRate / 100);
-        const lossHeight = 30 * ((100 - stats.winRate) / 100);
-        pdf.setFillColor(75, 192, 192);
-        pdf.rect(40, 100 - winHeight, 15, winHeight, 'F');
-        pdf.setFillColor(255, 99, 132);
-        pdf.rect(60, 100 - lossHeight, 15, lossHeight, 'F');
-        
-        // Legend
-        pdf.setFillColor(75, 192, 192);
-        pdf.rect(25, 110, 5, 5, 'F');
-        pdf.setFillColor(255, 99, 132);
-        pdf.rect(65, 110, 5, 5, 'F');
-        pdf.setFontSize(8);
-        pdf.text('Win', 32, 114);
-        pdf.text('Loss', 72, 114);
-        
-        // Second chart - type distribution
-        pdf.setDrawColor(200, 200, 200);
-        pdf.setFillColor(240, 240, 240);
-        pdf.roundedRect(110, 70, 85, 60, 3, 3, 'FD');
-        pdf.setFontSize(10);
-        pdf.text('Trade Type Distribution', 152.5, 75, { align: 'center' });
-        
-        // Draw mock pie sections for long/short
-        const longPct = longTrades.length / (longTrades.length + shortTrades.length) || 0;
-        pdf.setFillColor(54, 162, 235);
-        pdf.ellipse(152.5, 100, 20, 20, 'F');
-        pdf.setFillColor(255, 206, 86);
-        pdf.setDrawColor(240, 240, 240);
-        pdf.arc(152.5, 100, 20, 20, 0, longPct * 2 * Math.PI, 'F');
-        
-        // Legend
-        pdf.setFillColor(54, 162, 235);
-        pdf.rect(125, 110, 5, 5, 'F');
-        pdf.setFillColor(255, 206, 86);
-        pdf.rect(165, 110, 5, 5, 'F');
-        pdf.setFontSize(8);
-        pdf.text('Long', 132, 114);
-        pdf.text('Short', 172, 114);
-        
-        // Add page break after statistics
+        // Add page break before weekly performance details
         pdf.addPage();
         
         // Weekly Performance Details Section
