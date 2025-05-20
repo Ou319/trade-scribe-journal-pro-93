@@ -2,7 +2,17 @@
 import { Button } from "@/components/ui/button";
 import { useJournal } from "@/contexts/JournalContext";
 import ThemeToggle from "../ThemeToggle";
-import { FileText } from "lucide-react";
+import { FileText, Home, Settings } from "lucide-react";
+import { Link } from "react-router-dom";
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+  navigationMenuTriggerStyle,
+} from "@/components/ui/navigation-menu";
 
 const Navbar = () => {
   const { exportToPDF } = useJournal();
@@ -11,8 +21,27 @@ const Navbar = () => {
     <header className="border-b">
       <div className="container mx-auto px-4 flex h-16 items-center justify-between">
         <div className="flex items-center">
-          <h1 className="text-2xl font-bold mr-2">YTR</h1>
-          <span className="text-muted-foreground">Journal de Trading</span>
+          <Link to="/" className="flex items-center">
+            <h1 className="text-2xl font-bold mr-2">YTR</h1>
+            <span className="text-muted-foreground">Journal de Trading</span>
+          </Link>
+          
+          <NavigationMenu className="ml-4">
+            <NavigationMenuList>
+              <NavigationMenuItem>
+                <Link to="/" className={navigationMenuTriggerStyle()}>
+                  <Home className="mr-2 h-4 w-4" />
+                  Dashboard
+                </Link>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <Link to="/settings" className={navigationMenuTriggerStyle()}>
+                  <Settings className="mr-2 h-4 w-4" />
+                  Settings
+                </Link>
+              </NavigationMenuItem>
+            </NavigationMenuList>
+          </NavigationMenu>
         </div>
         
         <div className="flex items-center space-x-2">
