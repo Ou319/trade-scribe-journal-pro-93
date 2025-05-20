@@ -12,14 +12,22 @@ const Index = () => {
   const [settings, setSettings] = useState({
     appTitle: "YTR",
     appSubtitle: "Journal de Trading",
-    ownerName: "Outmane El ouaafa"
+    ownerName: "Outmane El ouaafa",
+    initialCapitalLabel: "Initial Capital",
+    currentCapitalLabel: "Current Capital",
+    editButtonText: "Edit"
   });
 
   useEffect(() => {
     // Load settings from localStorage if available
     const savedSettings = localStorage.getItem("app-settings");
     if (savedSettings) {
-      setSettings(JSON.parse(savedSettings));
+      try {
+        const parsedSettings = JSON.parse(savedSettings);
+        setSettings(prevSettings => ({...prevSettings, ...parsedSettings}));
+      } catch (e) {
+        console.error("Error parsing settings:", e);
+      }
     }
   }, []);
 
@@ -30,7 +38,11 @@ const Index = () => {
       <main className="flex-1 container mx-auto px-2 sm:px-4 py-3 sm:py-6">
         <div className="grid grid-cols-1 gap-3 sm:gap-4">
           {/* Capital Display */}
-          <CapitalDisplay />
+          <CapitalDisplay
+            initialCapitalLabel={settings.initialCapitalLabel}
+            currentCapitalLabel={settings.currentCapitalLabel}
+            editButtonText={settings.editButtonText}
+          />
           
           {/* Dashboard Stats */}
           <DashboardStats />
@@ -38,7 +50,7 @@ const Index = () => {
           {/* Week Detail */}
           <WeekDetail />
           
-          {/* Chart Analysis - Replaced with Data Management */}
+          {/* Settings Card */}
           <div className="mb-4">
             <ChartAnalysis />
           </div>

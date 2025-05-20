@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useJournal } from "@/contexts/JournalContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -22,13 +22,37 @@ import {
 const WeekDetail = () => {
   const { journal, currentWeekId, deleteWeek } = useJournal();
   const [isAddingTrade, setIsAddingTrade] = useState(false);
+  const [settings, setSettings] = useState({
+    weeklyTradesTitle: "Weekly Trades",
+    addTradeButtonText: "Add Trade",
+    weekPerformanceLabel: "Week Performance",
+    totalPerformanceLabel: "Total Performance"
+  });
+
+  useEffect(() => {
+    // Load settings from localStorage if available
+    const savedSettings = localStorage.getItem("app-settings");
+    if (savedSettings) {
+      try {
+        const parsedSettings = JSON.parse(savedSettings);
+        setSettings({
+          weeklyTradesTitle: parsedSettings.weeklyTradesTitle || "Weekly Trades",
+          addTradeButtonText: parsedSettings.addTradeButtonText || "Add Trade",
+          weekPerformanceLabel: parsedSettings.weekPerformanceLabel || "Week Performance",
+          totalPerformanceLabel: parsedSettings.totalPerformanceLabel || "Total Performance"
+        });
+      } catch (e) {
+        console.error("Error parsing settings:", e);
+      }
+    }
+  }, []);
 
   const currentWeek = journal.weeks.find((week) => week.id === currentWeekId);
 
   return (
     <Card className="mt-6">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-        <CardTitle>Weekly Trades</CardTitle>
+        <CardTitle>{settings.weeklyTradesTitle}</CardTitle>
         <div className="flex items-center space-x-2">
           <WeekSelector />
 
@@ -38,7 +62,7 @@ const WeekDetail = () => {
                 size="sm" 
                 onClick={() => setIsAddingTrade(true)}
               >
-                <Plus className="mr-1 h-4 w-4" /> Add Trade
+                <Plus className="mr-1 h-4 w-4" /> {settings.addTradeButtonText}
               </Button>
               
               <AlertDialog>
@@ -83,7 +107,7 @@ const WeekDetail = () => {
           <>
             <div className="mb-4 flex items-center justify-between">
               <div>
-                <span className="text-muted-foreground">Week Performance:</span>{" "}
+                <span className="text-muted-foreground">{settings.weekPerformanceLabel}:</span>{" "}
                 <span className={
                   currentWeek.percentGain > 0 
                     ? "text-profit font-bold" 
@@ -97,7 +121,7 @@ const WeekDetail = () => {
               </div>
               
               <div>
-                <span className="text-muted-foreground">Total Performance:</span>{" "}
+                <span className="text-muted-foreground">{settings.totalPerformanceLabel}:</span>{" "}
                 <span className={
                   journal.totalPercentGain > 0 
                     ? "text-profit font-bold" 
