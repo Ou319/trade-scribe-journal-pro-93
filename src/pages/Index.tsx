@@ -48,11 +48,11 @@ const Index = () => {
           {/* Dashboard Stats */}
           <DashboardStats />
           
-          {/* Performance Chart */}
-          <PerformanceChart title={settings.chartTitle} />
-          
           {/* Week Detail */}
           <WeekDetail />
+          
+          {/* Performance Chart - now positioned at the bottom */}
+          <PerformanceChart title={settings.chartTitle} />
         </div>
       </main>
       

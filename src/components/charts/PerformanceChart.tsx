@@ -8,6 +8,7 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  Legend,
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -15,19 +16,19 @@ interface PerformanceChartProps {
   title?: string;
 }
 
-// Sample data for the chart
+// Sample data for the chart with both daily wins and performance
 const sampleData = [
-  { x: 0, y: 200 },
-  { x: 1, y: 280 },
-  { x: 2, y: 290 },
-  { x: 3, y: 500 },
-  { x: 4, y: 470 },
-  { x: 5, y: 600 },
-  { x: 6, y: 550 },
-  { x: 7, y: 700 },
-  { x: 8, y: 800 },
-  { x: 9, y: 750 },
-  { x: 10, y: 950 }
+  { x: 0, performance: 200, dailyWin: 150 },
+  { x: 1, performance: 280, dailyWin: 220 },
+  { x: 2, performance: 290, dailyWin: 180 },
+  { x: 3, performance: 500, dailyWin: 350 },
+  { x: 4, performance: 470, dailyWin: 400 },
+  { x: 5, performance: 600, dailyWin: 520 },
+  { x: 6, performance: 550, dailyWin: 480 },
+  { x: 7, performance: 700, dailyWin: 600 },
+  { x: 8, performance: 800, dailyWin: 720 },
+  { x: 9, performance: 750, dailyWin: 680 },
+  { x: 10, performance: 950, dailyWin: 870 }
 ];
 
 const CustomTooltip = ({ active, payload }: any) => {
@@ -36,6 +37,9 @@ const CustomTooltip = ({ active, payload }: any) => {
       <div className="bg-white p-2 border border-gray-200 rounded shadow-md">
         <p className="font-medium">Day: {payload[0].payload.x}</p>
         <p className="text-red-500">Performance: {payload[0].value}</p>
+        {payload[1] && (
+          <p className="text-blue-500">Daily Win: {payload[1].value}</p>
+        )}
       </div>
     );
   }
@@ -58,9 +62,13 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({
               margin={{ top: 20, right: 30, left: 10, bottom: 10 }}
             >
               <defs>
-                <linearGradient id="colorGradient" x1="0" y1="0" x2="0" y2="1">
+                <linearGradient id="colorPerformance" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3} />
                   <stop offset="95%" stopColor="#ef4444" stopOpacity={0.05} />
+                </linearGradient>
+                <linearGradient id="colorDailyWin" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.05} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
@@ -76,20 +84,32 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({
                 tick={{ fontSize: 12 }}
                 tickLine={{ stroke: '#94a3b8' }}
                 axisLine={{ stroke: '#94a3b8' }}
-                label={{ value: 'Performance', angle: -90, position: 'insideLeft' }}
+                label={{ value: 'Value', angle: -90, position: 'insideLeft' }}
                 domain={[0, 1000]}
               />
               <Tooltip content={<CustomTooltip />} />
+              <Legend />
               <Line
                 type="monotone"
-                dataKey="y"
+                dataKey="performance"
                 name="Performance"
                 stroke="#ef4444"
                 strokeWidth={2}
                 dot={{ r: 4, strokeWidth: 2, fill: 'white', stroke: '#ef4444' }}
                 activeDot={{ r: 6, strokeWidth: 2 }}
                 animationDuration={1500}
-                fill="url(#colorGradient)"
+                fill="url(#colorPerformance)"
+              />
+              <Line
+                type="monotone"
+                dataKey="dailyWin"
+                name="Daily Win"
+                stroke="#3b82f6"
+                strokeWidth={2}
+                dot={{ r: 4, strokeWidth: 2, fill: 'white', stroke: '#3b82f6' }}
+                activeDot={{ r: 6, strokeWidth: 2 }}
+                animationDuration={1500}
+                fill="url(#colorDailyWin)"
               />
             </LineChart>
           </ResponsiveContainer>
