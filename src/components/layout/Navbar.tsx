@@ -51,7 +51,7 @@ const Navbar = () => {
             className="flex text-xs h-8 bg-primary hover:bg-primary/90 text-white"
             size="sm"
           >
-            <FileText className="mr-1.5 h-3.5 w-3.5" /> Export Professional PDF
+            <FileText className="mr-1.5 h-3.5 w-3.5" /> Export PDF Report
           </Button>
           
           <ThemeToggle />

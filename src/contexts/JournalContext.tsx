@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Trade, Week, TradeJournal, DashboardStats, TradeType, TradeResult, TradeStatus } from '@/types';
 import { toast } from 'sonner';
@@ -359,26 +360,26 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
       
       // Load the autoTable plugin
       import('jspdf-autotable').then(async ({ default: autoTable }) => {
-        // Define modern color scheme
+        // Define modern color scheme - properly typed as RGB tuples
         const colors = {
-          primary: [59, 130, 246],    // blue-500
-          secondary: [99, 102, 241],  // indigo-500
-          success: [16, 185, 129],    // green-500
-          danger: [239, 68, 68],      // red-500
-          warning: [245, 158, 11],    // amber-500
-          light: [249, 250, 251],     // gray-50
-          dark: [31, 41, 55],         // gray-800
-          text: [55, 65, 81],         // gray-700
-          lightText: [107, 114, 128], // gray-500
-          border: [229, 231, 235]     // gray-200
+          primary: [59, 130, 246] as [number, number, number],    // blue-500
+          secondary: [99, 102, 241] as [number, number, number],  // indigo-500
+          success: [16, 185, 129] as [number, number, number],    // green-500
+          danger: [239, 68, 68] as [number, number, number],      // red-500
+          warning: [245, 158, 11] as [number, number, number],    // amber-500
+          light: [249, 250, 251] as [number, number, number],     // gray-50
+          dark: [31, 41, 55] as [number, number, number],         // gray-800
+          text: [55, 65, 81] as [number, number, number],         // gray-700
+          lightText: [107, 114, 128] as [number, number, number], // gray-500
+          border: [229, 231, 235] as [number, number, number]     // gray-200
         };
         
         // Modern Cover page
-        pdf.setFillColor(...colors.light);
+        pdf.setFillColor(colors.light[0], colors.light[1], colors.light[2]);
         pdf.rect(0, 0, pdf.internal.pageSize.getWidth(), pdf.internal.pageSize.getHeight(), 'F');
         
         // Add decorative header
-        pdf.setFillColor(...colors.primary);
+        pdf.setFillColor(colors.primary[0], colors.primary[1], colors.primary[2]);
         pdf.rect(0, 0, pdf.internal.pageSize.getWidth(), 30, 'F');
         
         // Add title
@@ -388,14 +389,14 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
         pdf.text('YTR Trading Journal', 20, 20);
         
         // Add subtitle with date in modern format
-        pdf.setTextColor(...colors.dark);
+        pdf.setTextColor(colors.dark[0], colors.dark[1], colors.dark[2]);
         pdf.setFontSize(16);
         pdf.setFont('helvetica', 'normal');
         pdf.text(`Comprehensive Report`, 20, 45);
         
         // Add date with more elegant formatting
         pdf.setFontSize(12);
-        pdf.setTextColor(...colors.lightText);
+        pdf.setTextColor(colors.lightText[0], colors.lightText[1], colors.lightText[2]);
         const today = new Date();
         const formattedDate = today.toLocaleDateString('en-US', { 
           year: 'numeric', 
@@ -405,37 +406,37 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
         pdf.text(`Generated on ${formattedDate}`, 20, 52);
         
         // Add horizontal divider
-        pdf.setDrawColor(...colors.border);
+        pdf.setDrawColor(colors.border[0], colors.border[1], colors.border[2]);
         pdf.setLineWidth(0.5);
         pdf.line(20, 60, pdf.internal.pageSize.getWidth() - 20, 60);
         
         // Add total P/L info with modern style
         pdf.setFontSize(22);
         if (stats.totalProfitLossPercent >= 0) {
-          pdf.setTextColor(...colors.success);
+          pdf.setTextColor(colors.success[0], colors.success[1], colors.success[2]);
           pdf.text(`Total P/L: +${stats.totalProfitLossPercent.toFixed(2)}%`, 20, 75);
         } else {
-          pdf.setTextColor(...colors.danger);
+          pdf.setTextColor(colors.danger[0], colors.danger[1], colors.danger[2]);
           pdf.text(`Total P/L: ${stats.totalProfitLossPercent.toFixed(2)}%`, 20, 75);
         }
         
         // Add summary statistics in the cover
         pdf.setFontSize(12);
-        pdf.setTextColor(...colors.dark);
+        pdf.setTextColor(colors.dark[0], colors.dark[1], colors.dark[2]);
         pdf.text(`Total Trades: ${stats.totalTrades}`, 20, 95);
         pdf.text(`Win Rate: ${stats.winRate.toFixed(2)}%`, 20, 105);
         pdf.text(`Win/Loss Ratio: ${(stats.winTrades / (stats.loseTrades || 1)).toFixed(2)}`, 20, 115);
         
         // Add decorative footer
-        pdf.setFillColor(...colors.primary);
+        pdf.setFillColor(colors.primary[0], colors.primary[1], colors.primary[2]);
         pdf.rect(0, pdf.internal.pageSize.getHeight() - 15, pdf.internal.pageSize.getWidth(), 15, 'F');
         
         // Add page break after cover
         pdf.addPage();
         
         // Table of contents with modern style
-        pdf.setTextColor(...colors.dark);
-        pdf.setFillColor(...colors.primary);
+        pdf.setTextColor(colors.dark[0], colors.dark[1], colors.dark[2]);
+        pdf.setFillColor(colors.primary[0], colors.primary[1], colors.primary[2]);
         pdf.rect(0, 0, pdf.internal.pageSize.getWidth(), 15, 'F');
         pdf.setTextColor(255, 255, 255);
         pdf.setFontSize(14);
@@ -443,41 +444,41 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
         pdf.text('TABLE OF CONTENTS', 20, 10);
         
         // Reset text color for TOC items
-        pdf.setTextColor(...colors.dark);
+        pdf.setTextColor(colors.dark[0], colors.dark[1], colors.dark[2]);
         pdf.setFontSize(12);
         pdf.setFont('helvetica', 'normal');
         
         let pageNum = 2;
         pdf.text(`1. Trading Performance Summary`, 20, 30);
-        pdf.setTextColor(...colors.lightText);
+        pdf.setTextColor(colors.lightText[0], colors.lightText[1], colors.lightText[2]);
         pdf.text(`Page ${pageNum}`, 170, 30, { align: 'right' });
-        pdf.setTextColor(...colors.dark);
+        pdf.setTextColor(colors.dark[0], colors.dark[1], colors.dark[2]);
         
         pageNum++;
         pdf.text(`2. Trading Statistics`, 20, 40);
-        pdf.setTextColor(...colors.lightText);
+        pdf.setTextColor(colors.lightText[0], colors.lightText[1], colors.lightText[2]);
         pdf.text(`Page ${pageNum}`, 170, 40, { align: 'right' });
-        pdf.setTextColor(...colors.dark);
+        pdf.setTextColor(colors.dark[0], colors.dark[1], colors.dark[2]);
         
         pageNum++;
         pdf.text(`3. Weekly Performance Details`, 20, 50);
-        pdf.setTextColor(...colors.lightText);
+        pdf.setTextColor(colors.lightText[0], colors.lightText[1], colors.lightText[2]);
         pdf.text(`Page ${pageNum}`, 170, 50, { align: 'right' });
-        pdf.setTextColor(...colors.dark);
+        pdf.setTextColor(colors.dark[0], colors.dark[1], colors.dark[2]);
         
         pageNum += journal.weeks.length;
         pdf.text(`4. Individual Trade Analysis`, 20, 60);
-        pdf.setTextColor(...colors.lightText);
+        pdf.setTextColor(colors.lightText[0], colors.lightText[1], colors.lightText[2]);
         pdf.text(`Page ${pageNum}`, 170, 60, { align: 'right' });
-        pdf.setTextColor(...colors.dark);
+        pdf.setTextColor(colors.dark[0], colors.dark[1], colors.dark[2]);
         
         // Add horizontal divider
-        pdf.setDrawColor(...colors.border);
+        pdf.setDrawColor(colors.border[0], colors.border[1], colors.border[2]);
         pdf.line(20, 70, pdf.internal.pageSize.getWidth() - 20, 70);
         
         // Add decorative footer on each page
         const addFooter = () => {
-          pdf.setFillColor(...colors.primary);
+          pdf.setFillColor(colors.primary[0], colors.primary[1], colors.primary[2]);
           pdf.rect(0, pdf.internal.pageSize.getHeight() - 10, pdf.internal.pageSize.getWidth(), 10, 'F');
           pdf.setTextColor(255, 255, 255);
           pdf.setFontSize(8);
@@ -490,7 +491,7 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
         pdf.addPage();
         
         // Trading Performance Summary with modern design
-        pdf.setFillColor(...colors.primary);
+        pdf.setFillColor(colors.primary[0], colors.primary[1], colors.primary[2]);
         pdf.rect(0, 0, pdf.internal.pageSize.getWidth(), 15, 'F');
         pdf.setTextColor(255, 255, 255);
         pdf.setFontSize(14);
@@ -519,13 +520,13 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
           startY: 25,
           theme: 'grid',
           headStyles: {
-            fillColor: [...colors.secondary],
+            fillColor: colors.secondary,
             textColor: [255, 255, 255],
             fontStyle: 'bold',
             halign: 'center'
           },
           alternateRowStyles: {
-            fillColor: [...colors.light]
+            fillColor: colors.light
           },
           columnStyles: {
             0: { fontStyle: 'bold', cellWidth: 100 },
@@ -534,7 +535,7 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
           styles: {
             cellPadding: 8,
             fontSize: 10,
-            lineColor: [...colors.border],
+            lineColor: colors.border,
             lineWidth: 0.1
           },
           margin: { top: 25 }
@@ -546,7 +547,7 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
         pdf.addPage();
         
         // Trading Statistics with more details
-        pdf.setFillColor(...colors.primary);
+        pdf.setFillColor(colors.primary[0], colors.primary[1], colors.primary[2]);
         pdf.rect(0, 0, pdf.internal.pageSize.getWidth(), 15, 'F');
         pdf.setTextColor(255, 255, 255);
         pdf.setFontSize(14);
@@ -608,13 +609,13 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
           startY: 25,
           theme: 'grid',
           headStyles: {
-            fillColor: [...colors.secondary],
+            fillColor: colors.secondary,
             textColor: [255, 255, 255],
             fontStyle: 'bold',
             halign: 'center'
           },
           alternateRowStyles: {
-            fillColor: [...colors.light]
+            fillColor: colors.light
           },
           columnStyles: {
             0: { fontStyle: 'bold' },
@@ -625,7 +626,7 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
           styles: {
             cellPadding: 8,
             fontSize: 10,
-            lineColor: [...colors.border],
+            lineColor: colors.border,
             lineWidth: 0.1
           }
         });
@@ -636,7 +637,7 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
         pdf.addPage();
         
         // Weekly Performance Details Section with modern Excel-like styling
-        pdf.setFillColor(...colors.primary);
+        pdf.setFillColor(colors.primary[0], colors.primary[1], colors.primary[2]);
         pdf.rect(0, 0, pdf.internal.pageSize.getWidth(), 15, 'F');
         pdf.setTextColor(255, 255, 255);
         pdf.setFontSize(14);
@@ -650,7 +651,7 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
             pdf.addPage();
             
             // Add header to each page
-            pdf.setFillColor(...colors.primary);
+            pdf.setFillColor(colors.primary[0], colors.primary[1], colors.primary[2]);
             pdf.rect(0, 0, pdf.internal.pageSize.getWidth(), 15, 'F');
             pdf.setTextColor(255, 255, 255);
             pdf.setFontSize(14);
@@ -668,15 +669,15 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
           // Set color based on performance
           const weekPerformance = week.percentGain;
           if (weekPerformance > 0) {
-            pdf.setTextColor(...colors.success);
+            pdf.setTextColor(colors.success[0], colors.success[1], colors.success[2]);
           } else if (weekPerformance < 0) {
-            pdf.setTextColor(...colors.danger);
+            pdf.setTextColor(colors.danger[0], colors.danger[1], colors.danger[2]);
           } else {
-            pdf.setTextColor(...colors.dark);
+            pdf.setTextColor(colors.dark[0], colors.dark[1], colors.dark[2]);
           }
           
           pdf.text(`${week.name} (${week.percentGain.toFixed(2)}%)`, 20, yPosition);
-          pdf.setTextColor(...colors.dark); // reset text color
+          pdf.setTextColor(colors.dark[0], colors.dark[1], colors.dark[2]); // reset text color
           
           yPosition += 10;
           
@@ -701,7 +702,7 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
             startY: yPosition,
             theme: 'grid',
             headStyles: {
-              fillColor: [...colors.secondary],
+              fillColor: colors.secondary,
               textColor: [255, 255, 255],
               fontStyle: 'bold',
               halign: 'center'
@@ -709,7 +710,7 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
             styles: {
               cellPadding: 5,
               fontSize: 10,
-              lineColor: [...colors.border],
+              lineColor: colors.border,
               lineWidth: 0.1
             },
             columnStyles: {
@@ -755,18 +756,18 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
               startY: yPosition,
               theme: 'grid',
               headStyles: {
-                fillColor: [...colors.secondary],
+                fillColor: colors.secondary,
                 textColor: [255, 255, 255],
                 fontStyle: 'bold',
                 halign: 'center'
               },
               alternateRowStyles: {
-                fillColor: [...colors.light]
+                fillColor: colors.light
               },
               styles: {
                 cellPadding: 5,
                 fontSize: 9,
-                lineColor: [...colors.border],
+                lineColor: colors.border,
                 lineWidth: 0.1,
                 halign: 'center'
               },
@@ -774,31 +775,34 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
                 0: { cellWidth: 12 },  // Trade #
                 1: { cellWidth: 22 },  // Date
                 8: { cellWidth: 15 },  // R/R
-                9: { cellWidth: 18 },  // P/L %
-                
-                // Format cells conditionally
-                4: { 
-                  fontStyle: 'bold',
-                  // Custom cell renderer for results
-                  cellCallback: (cell, data) => {
-                    if (data.raw === 'Win') {
-                      cell.styles.textColor = colors.success;
-                    } else if (data.raw === 'Loss') {
-                      cell.styles.textColor = colors.danger;
+                9: { cellWidth: 18 }   // P/L %
+              },
+              didDrawCell: (data) => {
+                // Custom cell styling for results and P/L columns
+                if (data.section === 'body') {
+                  // For Result column (index 4)
+                  if (data.column.index === 4) {
+                    const value = data.cell.raw as string;
+                    if (value === 'Win') {
+                      pdf.setTextColor(colors.success[0], colors.success[1], colors.success[2]);
+                    } else if (value === 'Loss') {
+                      pdf.setTextColor(colors.danger[0], colors.danger[1], colors.danger[2]);
+                    } else {
+                      pdf.setTextColor(colors.dark[0], colors.dark[1], colors.dark[2]);
                     }
-                    return cell;
                   }
-                },
-                9: { 
-                  // Custom cell renderer for P/L column
-                  cellCallback: (cell, data) => {
-                    const value = parseFloat(data.raw);
+                  // For P/L column (index 9)
+                  else if (data.column.index === 9) {
+                    const value = parseFloat(data.cell.raw as string);
                     if (value > 0) {
-                      cell.styles.textColor = colors.success;
+                      pdf.setTextColor(colors.success[0], colors.success[1], colors.success[2]);
                     } else if (value < 0) {
-                      cell.styles.textColor = colors.danger;
+                      pdf.setTextColor(colors.danger[0], colors.danger[1], colors.danger[2]);
+                    } else {
+                      pdf.setTextColor(colors.dark[0], colors.dark[1], colors.dark[2]);
                     }
-                    return cell;
+                  } else {
+                    pdf.setTextColor(colors.dark[0], colors.dark[1], colors.dark[2]);
                   }
                 }
               },
@@ -822,7 +826,7 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
         pdf.addPage();
         
         // Individual Trade Analysis with modern design
-        pdf.setFillColor(...colors.primary);
+        pdf.setFillColor(colors.primary[0], colors.primary[1], colors.primary[2]);
         pdf.rect(0, 0, pdf.internal.pageSize.getWidth(), 15, 'F');
         pdf.setTextColor(255, 255, 255);
         pdf.setFontSize(14);
@@ -830,7 +834,7 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
         pdf.text('INDIVIDUAL TRADE ANALYSIS', 20, 10);
         
         // Reset text color
-        pdf.setTextColor(...colors.dark);
+        pdf.setTextColor(colors.dark[0], colors.dark[1], colors.dark[2]);
         
         let yPosition = 25;
         
@@ -856,7 +860,7 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
             pdf.addPage();
             
             // Add header to each page
-            pdf.setFillColor(...colors.primary);
+            pdf.setFillColor(colors.primary[0], colors.primary[1], colors.primary[2]);
             pdf.rect(0, 0, pdf.internal.pageSize.getWidth(), 15, 'F');
             pdf.setTextColor(255, 255, 255);
             pdf.setFontSize(14);
@@ -865,13 +869,13 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
             
             // Reset position and text color
             yPosition = 25;
-            pdf.setTextColor(...colors.dark);
+            pdf.setTextColor(colors.dark[0], colors.dark[1], colors.dark[2]);
           }
           
           // Card-like design for each trade
           // Draw card background
-          pdf.setFillColor(...colors.light);
-          pdf.setDrawColor(...colors.border);
+          pdf.setFillColor(colors.light[0], colors.light[1], colors.light[2]);
+          pdf.setDrawColor(colors.border[0], colors.border[1], colors.border[2]);
           pdf.roundedRect(15, yPosition, pdf.internal.pageSize.getWidth() - 30, 65, 3, 3, 'FD');
           
           // Trade header with color based on result
@@ -879,11 +883,11 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
           pdf.setFont('helvetica', 'bold');
           
           if (trade.result === 'Win') {
-            pdf.setTextColor(...colors.success);
+            pdf.setTextColor(colors.success[0], colors.success[1], colors.success[2]);
           } else if (trade.result === 'Loss') {
-            pdf.setTextColor(...colors.danger);
+            pdf.setTextColor(colors.danger[0], colors.danger[1], colors.danger[2]);
           } else {
-            pdf.setTextColor(...colors.dark);
+            pdf.setTextColor(colors.dark[0], colors.dark[1], colors.dark[2]);
           }
           
           const tradeDate = trade.date instanceof Date ? 
@@ -893,7 +897,7 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
           pdf.text(`Trade #${index + 1}: ${trade.pair} (${tradeDate})`, 20, yPosition + 10);
           
           // Reset text color for details
-          pdf.setTextColor(...colors.dark);
+          pdf.setTextColor(colors.dark[0], colors.dark[1], colors.dark[2]);
           
           // Trade details
           pdf.setFontSize(10);
@@ -916,26 +920,26 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
           
           // Result with colored text
           if (trade.result === 'Win') {
-            pdf.setTextColor(...colors.success);
+            pdf.setTextColor(colors.success[0], colors.success[1], colors.success[2]);
           } else if (trade.result === 'Loss') {
-            pdf.setTextColor(...colors.danger);
+            pdf.setTextColor(colors.danger[0], colors.danger[1], colors.danger[2]);
           } else {
-            pdf.setTextColor(...colors.dark);
+            pdf.setTextColor(colors.dark[0], colors.dark[1], colors.dark[2]);
           }
           pdf.text(`Result: ${trade.result || 'N/A'}`, 145, detailsY + 10);
           
           // P/L with colored text
           if (trade.gainLossPercent > 0) {
-            pdf.setTextColor(...colors.success);
+            pdf.setTextColor(colors.success[0], colors.success[1], colors.success[2]);
           } else if (trade.gainLossPercent < 0) {
-            pdf.setTextColor(...colors.danger);
+            pdf.setTextColor(colors.danger[0], colors.danger[1], colors.danger[2]);
           } else {
-            pdf.setTextColor(...colors.dark);
+            pdf.setTextColor(colors.dark[0], colors.dark[1], colors.dark[2]);
           }
           pdf.text(`P/L: ${trade.gainLossPercent.toFixed(2)}%`, 145, detailsY + 20);
           
           // Reset text color
-          pdf.setTextColor(...colors.dark);
+          pdf.setTextColor(colors.dark[0], colors.dark[1], colors.dark[2]);
           
           // Add trade comments if any
           if (trade.comment) {
@@ -959,7 +963,7 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
         pdf.addPage();
         
         // Modern conclusion page
-        pdf.setFillColor(...colors.primary);
+        pdf.setFillColor(colors.primary[0], colors.primary[1], colors.primary[2]);
         pdf.rect(0, 0, pdf.internal.pageSize.getWidth(), 15, 'F');
         pdf.setTextColor(255, 255, 255);
         pdf.setFontSize(14);
@@ -967,7 +971,7 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
         pdf.text('TRADING JOURNAL SUMMARY', 20, 10);
         
         // Reset text color
-        pdf.setTextColor(...colors.dark);
+        pdf.setTextColor(colors.dark[0], colors.dark[1], colors.dark[2]);
         
         // Add trading insights with modern design
         pdf.setFontSize(12);
@@ -976,8 +980,8 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
         const winRate = stats.winRate;
         
         // Create a conclusion card
-        pdf.setFillColor(...colors.light);
-        pdf.setDrawColor(...colors.border);
+        pdf.setFillColor(colors.light[0], colors.light[1], colors.light[2]);
+        pdf.setDrawColor(colors.border[0], colors.border[1], colors.border[2]);
         pdf.roundedRect(15, 25, pdf.internal.pageSize.getWidth() - 30, 100, 3, 3, 'FD');
         
         let insights = "Performance Insights:";
