@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { DollarSign } from "lucide-react";
+import LossReportForm from "./LossReportForm";
 
 interface CapitalDisplayProps {
   initialCapitalLabel?: string;
@@ -22,7 +23,11 @@ const CapitalDisplay = ({
   const { journal, stats } = useJournal();
   const [capital, setCapital] = useState<number | null>(null);
   const [showDialog, setShowDialog] = useState(false);
+  const [showLossReport, setShowLossReport] = useState(false);
   const [inputCapital, setInputCapital] = useState("");
+  
+  // WhatsApp number to send loss reports to (replace with your actual number)
+  const whatsappNumber = "07196979"; 
 
   // Check if capital is stored in localStorage
   useEffect(() => {
@@ -91,20 +96,31 @@ const CapitalDisplay = ({
                     </span>
                   )}
                 </div>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="ml-auto"
-                  onClick={() => setShowDialog(true)}
-                >
-                  {editButtonText}
-                </Button>
+                <div className="ml-auto flex flex-col gap-2 sm:flex-row">
+                  <Button 
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => setShowLossReport(true)}
+                    className="text-xs"
+                  >
+                    Report Loss
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => setShowDialog(true)}
+                    className="text-xs"
+                  >
+                    {editButtonText}
+                  </Button>
+                </div>
               </div>
             </div>
           </CardContent>
         </Card>
       )}
       
+      {/* Capital Entry Dialog */}
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
         <DialogContent>
           <DialogHeader>
@@ -124,6 +140,14 @@ const CapitalDisplay = ({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      
+      {/* Loss Report Form */}
+      <LossReportForm 
+        open={showLossReport}
+        onOpenChange={setShowLossReport}
+        capital={capital}
+        whatsappNumber={whatsappNumber}
+      />
     </>
   );
 };
