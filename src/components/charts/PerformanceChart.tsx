@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useMemo } from "react";
 import {
   LineChart,
   Line,
@@ -11,34 +11,20 @@ import {
   Legend,
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useJournal } from "@/contexts/JournalContext";
 
 interface PerformanceChartProps {
   title?: string;
 }
 
-// Sample data for the chart with both daily wins and performance
-const sampleData = [
-  { x: 0, performance: 200, dailyWin: 150 },
-  { x: 1, performance: 280, dailyWin: 220 },
-  { x: 2, performance: 290, dailyWin: 180 },
-  { x: 3, performance: 500, dailyWin: 350 },
-  { x: 4, performance: 470, dailyWin: 400 },
-  { x: 5, performance: 600, dailyWin: 520 },
-  { x: 6, performance: 550, dailyWin: 480 },
-  { x: 7, performance: 700, dailyWin: 600 },
-  { x: 8, performance: 800, dailyWin: 720 },
-  { x: 9, performance: 750, dailyWin: 680 },
-  { x: 10, performance: 950, dailyWin: 870 }
-];
-
 const CustomTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
     return (
       <div className="bg-white p-2 border border-gray-200 rounded shadow-md">
-        <p className="font-medium">Day: {payload[0].payload.x}</p>
-        <p className="text-red-500">Performance: {payload[0].value}</p>
+        <p className="font-medium">Day: {payload[0].payload.day}</p>
+        <p className="text-red-500">Performance: {payload[0].value.toFixed(2)}%</p>
         {payload[1] && (
-          <p className="text-blue-500">Daily Win: {payload[1].value}</p>
+          <p className="text-blue-500">Daily Win: {payload[1].value.toFixed(2)}%</p>
         )}
       </div>
     );
@@ -49,6 +35,78 @@ const CustomTooltip = ({ active, payload }: any) => {
 const PerformanceChart: React.FC<PerformanceChartProps> = ({
   title = "Trading Performance"
 }) => {
+  const { journal, stats } = useJournal();
+  
+  // Generate performance data from the journal
+  const performanceData = useMemo(() => {
+    let cumulativePerformance = 0;
+    
+    // Flatten all trades and sort by date
+    const allTrades = journal.weeks
+      .flatMap(week => week.trades)
+      .filter(trade => trade.status === 'Done')
+      .sort((a, b) => {
+        const dateA = a.date instanceof Date ? a.date : new Date(a.date);
+        const dateB = b.date instanceof Date ? b.date : new Date(b.date);
+        return dateA.getTime() - dateB.getTime();
+      });
+    
+    // Group trades by day for daily wins
+    const tradesByDay = allTrades.reduce((acc, trade) => {
+      const tradeDate = trade.date instanceof Date ? trade.date : new Date(trade.date);
+      const dateKey = tradeDate.toISOString().split('T')[0];
+      
+      if (!acc[dateKey]) {
+        acc[dateKey] = [];
+      }
+      acc[dateKey].push(trade);
+      return acc;
+    }, {} as Record<string, typeof allTrades>);
+    
+    // Generate chart data with performance accumulation
+    const chartData = [];
+    
+    // If we have at least one trade
+    if (allTrades.length > 0) {
+      let day = 0;
+      
+      Object.entries(tradesByDay).forEach(([dateKey, trades]) => {
+        const dailyWin = trades.reduce((sum, trade) => sum + trade.gainLossPercent, 0);
+        cumulativePerformance += dailyWin;
+        
+        chartData.push({
+          day: day,
+          date: new Date(dateKey),
+          dailyWin: dailyWin,
+          performance: cumulativePerformance
+        });
+        
+        day++;
+      });
+    } else {
+      // Placeholder data if no trades
+      for (let i = 0; i <= 10; i++) {
+        chartData.push({
+          day: i,
+          date: new Date(),
+          dailyWin: 0,
+          performance: 0
+        });
+      }
+    }
+    
+    return chartData;
+  }, [journal]);
+  
+  // Calculate the maximum performance value for Y-axis domain
+  const maxPerformance = useMemo(() => {
+    if (performanceData.length === 0) return 1000;
+    
+    const max = Math.max(...performanceData.map(d => d.performance));
+    // Round up to next nice number for Y-axis
+    return Math.ceil(max / 100) * 100 || 1000;
+  }, [performanceData]);
+  
   return (
     <Card className="shadow-lg overflow-hidden rounded-xl bg-gradient-to-b from-white to-gray-50">
       <CardHeader className="bg-gradient-to-r from-background to-background/50 pb-2">
@@ -58,7 +116,7 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({
         <div className="h-[400px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart
-              data={sampleData}
+              data={performanceData}
               margin={{ top: 20, right: 30, left: 10, bottom: 10 }}
             >
               <defs>
@@ -73,19 +131,18 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
               <XAxis 
-                dataKey="x" 
+                dataKey="day" 
                 tick={{ fontSize: 12 }}
                 tickLine={{ stroke: '#94a3b8' }}
                 axisLine={{ stroke: '#94a3b8' }}
                 label={{ value: 'Day', position: 'insideBottom', offset: -5 }}
-                domain={[0, 10]}
               />
               <YAxis 
                 tick={{ fontSize: 12 }}
                 tickLine={{ stroke: '#94a3b8' }}
                 axisLine={{ stroke: '#94a3b8' }}
-                label={{ value: 'Value', angle: -90, position: 'insideLeft' }}
-                domain={[0, 1000]}
+                label={{ value: 'Value (%)', angle: -90, position: 'insideLeft' }}
+                domain={[0, maxPerformance]}
               />
               <Tooltip content={<CustomTooltip />} />
               <Legend />
