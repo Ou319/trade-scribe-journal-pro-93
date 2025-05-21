@@ -347,7 +347,7 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   };
   
-  // Export comprehensive report as PDF - enhanced version
+  // Export comprehensive report as PDF - enhanced version with modern design
   const exportToPDF = () => {
     try {
       // Initialize PDF document with A4 portrait format
@@ -359,98 +359,199 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
       
       // Load the autoTable plugin
       import('jspdf-autotable').then(async ({ default: autoTable }) => {
-        // Cover page
-        pdf.setFillColor(245, 245, 245);
+        // Define modern color scheme
+        const colors = {
+          primary: [59, 130, 246],    // blue-500
+          secondary: [99, 102, 241],  // indigo-500
+          success: [16, 185, 129],    // green-500
+          danger: [239, 68, 68],      // red-500
+          warning: [245, 158, 11],    // amber-500
+          light: [249, 250, 251],     // gray-50
+          dark: [31, 41, 55],         // gray-800
+          text: [55, 65, 81],         // gray-700
+          lightText: [107, 114, 128], // gray-500
+          border: [229, 231, 235]     // gray-200
+        };
+        
+        // Modern Cover page
+        pdf.setFillColor(...colors.light);
         pdf.rect(0, 0, pdf.internal.pageSize.getWidth(), pdf.internal.pageSize.getHeight(), 'F');
         
+        // Add decorative header
+        pdf.setFillColor(...colors.primary);
+        pdf.rect(0, 0, pdf.internal.pageSize.getWidth(), 30, 'F');
+        
         // Add title
-        pdf.setTextColor(40, 40, 40);
-        pdf.setFontSize(24);
+        pdf.setTextColor(255, 255, 255);
+        pdf.setFontSize(28);
         pdf.setFont('helvetica', 'bold');
-        pdf.text('YTR Trading Journal', pdf.internal.pageSize.getWidth() / 2, 50, { align: 'center' });
+        pdf.text('YTR Trading Journal', 20, 20);
         
-        // Add date
-        pdf.setFontSize(14);
-        pdf.setTextColor(100, 100, 100);
-        pdf.text(`Comprehensive Report: ${new Date().toLocaleDateString()}`, 
-                 pdf.internal.pageSize.getWidth() / 2, 65, { align: 'center' });
+        // Add subtitle with date in modern format
+        pdf.setTextColor(...colors.dark);
+        pdf.setFontSize(16);
+        pdf.setFont('helvetica', 'normal');
+        pdf.text(`Comprehensive Report`, 20, 45);
         
-        // Add total P/L info
-        pdf.setFontSize(18);
-        pdf.setTextColor(stats.totalProfitLossPercent >= 0 ? 0 : 255, 
-                         stats.totalProfitLossPercent >= 0 ? 150 : 0, 0);
-        pdf.text(`Total P/L: ${stats.totalProfitLossPercent.toFixed(2)}%`, 
-                 pdf.internal.pageSize.getWidth() / 2, 85, { align: 'center' });
+        // Add date with more elegant formatting
+        pdf.setFontSize(12);
+        pdf.setTextColor(...colors.lightText);
+        const today = new Date();
+        const formattedDate = today.toLocaleDateString('en-US', { 
+          year: 'numeric', 
+          month: 'long', 
+          day: 'numeric' 
+        });
+        pdf.text(`Generated on ${formattedDate}`, 20, 52);
+        
+        // Add horizontal divider
+        pdf.setDrawColor(...colors.border);
+        pdf.setLineWidth(0.5);
+        pdf.line(20, 60, pdf.internal.pageSize.getWidth() - 20, 60);
+        
+        // Add total P/L info with modern style
+        pdf.setFontSize(22);
+        if (stats.totalProfitLossPercent >= 0) {
+          pdf.setTextColor(...colors.success);
+          pdf.text(`Total P/L: +${stats.totalProfitLossPercent.toFixed(2)}%`, 20, 75);
+        } else {
+          pdf.setTextColor(...colors.danger);
+          pdf.text(`Total P/L: ${stats.totalProfitLossPercent.toFixed(2)}%`, 20, 75);
+        }
+        
+        // Add summary statistics in the cover
+        pdf.setFontSize(12);
+        pdf.setTextColor(...colors.dark);
+        pdf.text(`Total Trades: ${stats.totalTrades}`, 20, 95);
+        pdf.text(`Win Rate: ${stats.winRate.toFixed(2)}%`, 20, 105);
+        pdf.text(`Win/Loss Ratio: ${(stats.winTrades / (stats.loseTrades || 1)).toFixed(2)}`, 20, 115);
+        
+        // Add decorative footer
+        pdf.setFillColor(...colors.primary);
+        pdf.rect(0, pdf.internal.pageSize.getHeight() - 15, pdf.internal.pageSize.getWidth(), 15, 'F');
         
         // Add page break after cover
         pdf.addPage();
         
-        // Table of contents
-        pdf.setTextColor(40, 40, 40);
-        pdf.setFontSize(20);
+        // Table of contents with modern style
+        pdf.setTextColor(...colors.dark);
+        pdf.setFillColor(...colors.primary);
+        pdf.rect(0, 0, pdf.internal.pageSize.getWidth(), 15, 'F');
+        pdf.setTextColor(255, 255, 255);
+        pdf.setFontSize(14);
         pdf.setFont('helvetica', 'bold');
-        pdf.text('Table of Contents', 15, 20);
+        pdf.text('TABLE OF CONTENTS', 20, 10);
+        
+        // Reset text color for TOC items
+        pdf.setTextColor(...colors.dark);
         pdf.setFontSize(12);
         pdf.setFont('helvetica', 'normal');
         
         let pageNum = 2;
-        pdf.text(`1. Trading Performance Summary .......................... Page ${pageNum}`, 20, 35);
+        pdf.text(`1. Trading Performance Summary`, 20, 30);
+        pdf.setTextColor(...colors.lightText);
+        pdf.text(`Page ${pageNum}`, 170, 30, { align: 'right' });
+        pdf.setTextColor(...colors.dark);
+        
         pageNum++;
-        pdf.text(`2. Trading Statistics ......................................... Page ${pageNum}`, 20, 45);
+        pdf.text(`2. Trading Statistics`, 20, 40);
+        pdf.setTextColor(...colors.lightText);
+        pdf.text(`Page ${pageNum}`, 170, 40, { align: 'right' });
+        pdf.setTextColor(...colors.dark);
+        
         pageNum++;
-        pdf.text(`3. Weekly Performance Details .......................... Page ${pageNum}`, 20, 55);
+        pdf.text(`3. Weekly Performance Details`, 20, 50);
+        pdf.setTextColor(...colors.lightText);
+        pdf.text(`Page ${pageNum}`, 170, 50, { align: 'right' });
+        pdf.setTextColor(...colors.dark);
+        
         pageNum += journal.weeks.length;
-        pdf.text(`4. Individual Trade Analysis .............................. Page ${pageNum}`, 20, 65);
+        pdf.text(`4. Individual Trade Analysis`, 20, 60);
+        pdf.setTextColor(...colors.lightText);
+        pdf.text(`Page ${pageNum}`, 170, 60, { align: 'right' });
+        pdf.setTextColor(...colors.dark);
+        
+        // Add horizontal divider
+        pdf.setDrawColor(...colors.border);
+        pdf.line(20, 70, pdf.internal.pageSize.getWidth() - 20, 70);
+        
+        // Add decorative footer on each page
+        const addFooter = () => {
+          pdf.setFillColor(...colors.primary);
+          pdf.rect(0, pdf.internal.pageSize.getHeight() - 10, pdf.internal.pageSize.getWidth(), 10, 'F');
+          pdf.setTextColor(255, 255, 255);
+          pdf.setFontSize(8);
+          pdf.text(`YTR Trading Journal - ${formattedDate}`, pdf.internal.pageSize.getWidth() / 2, pdf.internal.pageSize.getHeight() - 4, { align: 'center' });
+        };
+        
+        addFooter();
         
         // Add page break after TOC
         pdf.addPage();
         
-        // Trading Performance Summary
-        pdf.setTextColor(40, 40, 40);
-        pdf.setFontSize(20);
+        // Trading Performance Summary with modern design
+        pdf.setFillColor(...colors.primary);
+        pdf.rect(0, 0, pdf.internal.pageSize.getWidth(), 15, 'F');
+        pdf.setTextColor(255, 255, 255);
+        pdf.setFontSize(14);
         pdf.setFont('helvetica', 'bold');
-        pdf.text('Trading Performance Summary', 15, 20);
+        pdf.text('TRADING PERFORMANCE SUMMARY', 20, 10);
         
-        // Create summary table
-        const summaryColumns = ["Metric", "Value"];
-        const summaryRows = [
-          ["Total Trades", stats.totalTrades.toString()],
-          ["Win Rate", `${stats.winRate.toFixed(2)}%`],
-          ["Win Trades", stats.winTrades.toString()],
-          ["Loss Trades", stats.loseTrades.toString()],
-          ["Breakeven Trades", stats.breakevenTrades.toString()],
-          ["Total P/L", `${stats.totalProfitLossPercent.toFixed(2)}%`],
-          ["Avg Risk/Reward", stats.riskRewardAverage.toFixed(2)]
+        // Create modern summary table
+        const summaryColumns = [
+          { header: 'Metric', dataKey: 'metric' },
+          { header: 'Value', dataKey: 'value' }
+        ];
+        
+        const summaryData = [
+          { metric: "Total Trades", value: stats.totalTrades.toString() },
+          { metric: "Win Rate", value: `${stats.winRate.toFixed(2)}%` },
+          { metric: "Win Trades", value: stats.winTrades.toString() },
+          { metric: "Loss Trades", value: stats.loseTrades.toString() },
+          { metric: "Breakeven Trades", value: stats.breakevenTrades.toString() },
+          { metric: "Total P/L", value: `${stats.totalProfitLossPercent.toFixed(2)}%` },
+          { metric: "Avg Risk/Reward", value: stats.riskRewardAverage.toFixed(2) }
         ];
         
         autoTable(pdf, {
-          head: [summaryColumns],
-          body: summaryRows,
-          startY: 30,
+          head: [summaryColumns.map(col => col.header)],
+          body: summaryData.map(row => [row.metric, row.value]),
+          startY: 25,
           theme: 'grid',
           headStyles: {
-            fillColor: [59, 130, 246], // blue-500
+            fillColor: [...colors.secondary],
             textColor: [255, 255, 255],
-            fontStyle: 'bold'
+            fontStyle: 'bold',
+            halign: 'center'
+          },
+          alternateRowStyles: {
+            fillColor: [...colors.light]
+          },
+          columnStyles: {
+            0: { fontStyle: 'bold', cellWidth: 100 },
+            1: { halign: 'center' }
           },
           styles: {
-            cellPadding: 5,
-            fontSize: 10
+            cellPadding: 8,
+            fontSize: 10,
+            lineColor: [...colors.border],
+            lineWidth: 0.1
           },
-          margin: { top: 30 }
+          margin: { top: 25 }
         });
+        
+        addFooter();
         
         // Add page break after summary
         pdf.addPage();
         
         // Trading Statistics with more details
-        pdf.setFontSize(20);
+        pdf.setFillColor(...colors.primary);
+        pdf.rect(0, 0, pdf.internal.pageSize.getWidth(), 15, 'F');
+        pdf.setTextColor(255, 255, 255);
+        pdf.setFontSize(14);
         pdf.setFont('helvetica', 'bold');
-        pdf.text('Trading Statistics', 15, 20);
-        
-        // Add more detailed statistics
-        pdf.setFont('helvetica', 'normal');
-        pdf.setFontSize(12);
+        pdf.text('TRADING STATISTICS', 20, 10);
         
         // Calculate additional statistics
         const longTrades = journal.weeks.flatMap(w => 
@@ -466,148 +567,272 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
         const longWinRate = longTrades.length > 0 ? (longWins / longTrades.length * 100).toFixed(2) : '0.00';
         const shortWinRate = shortTrades.length > 0 ? (shortWins / shortTrades.length * 100).toFixed(2) : '0.00';
         
-        const advancedStats = [
-          ["Total Long Trades", longTrades.length.toString(), "Total Short Trades", shortTrades.length.toString()],
-          ["Long Win Rate", `${longWinRate}%`, "Short Win Rate", `${shortWinRate}%`],
-          ["Long Wins", longWins.toString(), "Short Wins", shortWins.toString()],
-          ["Long Losses", longLosses.toString(), "Short Losses", shortLosses.toString()]
+        // Create advanced statistics tables with modern design
+        const statColumns = [
+          { header: 'Category', dataKey: 'category' },
+          { header: 'Long', dataKey: 'long' },
+          { header: 'Short', dataKey: 'short' },
+          { header: 'Total', dataKey: 'total' }
+        ];
+        
+        const statData = [
+          { 
+            category: "Total Trades", 
+            long: longTrades.length, 
+            short: shortTrades.length, 
+            total: stats.totalTrades 
+          },
+          { 
+            category: "Win Rate", 
+            long: `${longWinRate}%`, 
+            short: `${shortWinRate}%`, 
+            total: `${stats.winRate.toFixed(2)}%` 
+          },
+          { 
+            category: "Wins", 
+            long: longWins, 
+            short: shortWins, 
+            total: stats.winTrades 
+          },
+          { 
+            category: "Losses", 
+            long: longLosses, 
+            short: shortLosses, 
+            total: stats.loseTrades 
+          }
         ];
         
         autoTable(pdf, {
-          body: advancedStats,
-          startY: 30,
-          theme: 'plain',
+          head: [statColumns.map(col => col.header)],
+          body: statData.map(row => [row.category, row.long, row.short, row.total]),
+          startY: 25,
+          theme: 'grid',
+          headStyles: {
+            fillColor: [...colors.secondary],
+            textColor: [255, 255, 255],
+            fontStyle: 'bold',
+            halign: 'center'
+          },
+          alternateRowStyles: {
+            fillColor: [...colors.light]
+          },
+          columnStyles: {
+            0: { fontStyle: 'bold' },
+            1: { halign: 'center' },
+            2: { halign: 'center' },
+            3: { halign: 'center' }
+          },
           styles: {
-            cellPadding: 5,
-            fontSize: 10
+            cellPadding: 8,
+            fontSize: 10,
+            lineColor: [...colors.border],
+            lineWidth: 0.1
           }
         });
+        
+        addFooter();
         
         // Add page break before weekly performance details
         pdf.addPage();
         
-        // Weekly Performance Details Section
-        pdf.setFontSize(20);
+        // Weekly Performance Details Section with modern Excel-like styling
+        pdf.setFillColor(...colors.primary);
+        pdf.rect(0, 0, pdf.internal.pageSize.getWidth(), 15, 'F');
+        pdf.setTextColor(255, 255, 255);
+        pdf.setFontSize(14);
         pdf.setFont('helvetica', 'bold');
-        pdf.text('Weekly Performance Details', 15, 20);
+        pdf.text('WEEKLY PERFORMANCE DETAILS', 20, 10);
         
-        let yPosition = 30;
-        
-        // Loop through each week
+        // Loop through each week with Excel-like tables
         journal.weeks.forEach((week, weekIndex) => {
-          // Add new page if needed
-          if (yPosition > pdf.internal.pageSize.getHeight() - 40) {
+          // If not the first week, add a new page
+          if (weekIndex > 0) {
             pdf.addPage();
-            yPosition = 20;
+            
+            // Add header to each page
+            pdf.setFillColor(...colors.primary);
+            pdf.rect(0, 0, pdf.internal.pageSize.getWidth(), 15, 'F');
+            pdf.setTextColor(255, 255, 255);
+            pdf.setFontSize(14);
+            pdf.setFont('helvetica', 'bold');
+            pdf.text('WEEKLY PERFORMANCE DETAILS', 20, 10);
           }
           
-          // Week header with performance indicator
-          pdf.setFontSize(14);
+          // Set position for week header
+          let yPosition = 25;
+          
+          // Create modern week header with performance indicator
+          pdf.setFontSize(16);
           pdf.setFont('helvetica', 'bold');
           
           // Set color based on performance
           const weekPerformance = week.percentGain;
           if (weekPerformance > 0) {
-            pdf.setTextColor(0, 150, 0); // green for profit
+            pdf.setTextColor(...colors.success);
           } else if (weekPerformance < 0) {
-            pdf.setTextColor(200, 0, 0); // red for loss
+            pdf.setTextColor(...colors.danger);
           } else {
-            pdf.setTextColor(100, 100, 100); // gray for breakeven
+            pdf.setTextColor(...colors.dark);
           }
           
-          pdf.text(`${week.name}: ${week.percentGain.toFixed(2)}%`, 15, yPosition);
-          pdf.setTextColor(40, 40, 40); // reset text color
+          pdf.text(`${week.name} (${week.percentGain.toFixed(2)}%)`, 20, yPosition);
+          pdf.setTextColor(...colors.dark); // reset text color
           
           yPosition += 10;
           
-          // Add week summary table
+          // Get week stats
           const weekTrades = week.trades.filter(t => t.status === 'Done');
           const weekWins = weekTrades.filter(t => t.result === 'Win').length;
           const weekLosses = weekTrades.filter(t => t.result === 'Loss').length;
           const weekWinRate = weekTrades.length > 0 ? (weekWins / weekTrades.length * 100).toFixed(2) : '0.00';
           
+          // Add week summary with modern design
           const weekSummaryData = [
-            ["Total Trades", weekTrades.length.toString()],
-            ["Win Rate", `${weekWinRate}%`],
-            ["Win/Loss", `${weekWins}/${weekLosses}`],
-            ["P/L", `${week.percentGain.toFixed(2)}%`]
+            { metric: "Total Trades", value: weekTrades.length },
+            { metric: "Win Rate", value: `${weekWinRate}%` },
+            { metric: "Win/Loss", value: `${weekWins}/${weekLosses}` },
+            { metric: "P/L", value: `${week.percentGain.toFixed(2)}%` }
           ];
           
+          // Create a summary table for the week stats
           autoTable(pdf, {
-            body: weekSummaryData,
+            head: [["Metric", "Value"]],
+            body: weekSummaryData.map(row => [row.metric, row.value]),
             startY: yPosition,
-            theme: 'plain',
+            theme: 'grid',
+            headStyles: {
+              fillColor: [...colors.secondary],
+              textColor: [255, 255, 255],
+              fontStyle: 'bold',
+              halign: 'center'
+            },
             styles: {
-              cellPadding: 2,
-              fontSize: 8
+              cellPadding: 5,
+              fontSize: 10,
+              lineColor: [...colors.border],
+              lineWidth: 0.1
             },
             columnStyles: {
-              0: { fontStyle: 'bold' }
+              0: { fontStyle: 'bold', cellWidth: 80 },
+              1: { halign: 'center' }
             },
-            margin: { left: 20 }
+            margin: { left: 20, right: 20 }
           });
           
-          // Get table end position
-          yPosition = pdf.previousAutoTable?.finalY ? pdf.previousAutoTable.finalY + 10 : yPosition + 25;
+          // Update Y position for trades table
+          yPosition = pdf.previousAutoTable?.finalY ? pdf.previousAutoTable.finalY + 15 : yPosition + 40;
           
-          // Weekly trades summary if there are trades
-          if (week.trades.length > 0) {
-            // Prepare simplified trade data
-            const tradeColumns = ["Pair", "Type", "Result", "P/L %"];
-            const tradeRows = week.trades
-              .filter(t => t.status === 'Done')
-              .map(trade => [
+          // Excel-like trades table
+          if (weekTrades.length > 0) {
+            // Create modern Excel-like table for trades
+            const tradeColumns = [
+              "Trade #", "Date", "Pair", "Type", "Result", "Entry", "SL", "TP", "R/R", "P/L %"
+            ];
+            
+            const tradeRows = weekTrades.map((trade, idx) => {
+              const tradeDate = trade.date instanceof Date ? 
+                trade.date.toLocaleDateString() : 
+                new Date(trade.date).toLocaleDateString();
+                
+              return [
+                (idx + 1).toString(),
+                tradeDate,
                 trade.pair,
                 trade.type,
                 trade.result || "-",
+                trade.entry.toString(),
+                trade.stopLoss.toString(),
+                trade.takeProfit.toString(),
+                trade.riskReward.toFixed(2),
                 `${trade.gainLossPercent.toFixed(2)}%`
-              ]);
+              ];
+            });
             
-            // Only add table if we have completed trades
-            if (tradeRows.length > 0) {
-              autoTable(pdf, {
-                head: [tradeColumns],
-                body: tradeRows,
-                startY: yPosition,
-                theme: 'striped',
-                headStyles: {
-                  fillColor: [100, 116, 139], // slate-500
-                  textColor: [255, 255, 255],
-                  fontStyle: 'bold'
+            // Excel-like styling for the trades table
+            autoTable(pdf, {
+              head: [tradeColumns],
+              body: tradeRows,
+              startY: yPosition,
+              theme: 'grid',
+              headStyles: {
+                fillColor: [...colors.secondary],
+                textColor: [255, 255, 255],
+                fontStyle: 'bold',
+                halign: 'center'
+              },
+              alternateRowStyles: {
+                fillColor: [...colors.light]
+              },
+              styles: {
+                cellPadding: 5,
+                fontSize: 9,
+                lineColor: [...colors.border],
+                lineWidth: 0.1,
+                halign: 'center'
+              },
+              columnStyles: {
+                0: { cellWidth: 12 },  // Trade #
+                1: { cellWidth: 22 },  // Date
+                8: { cellWidth: 15 },  // R/R
+                9: { cellWidth: 18 },  // P/L %
+                
+                // Format cells conditionally
+                4: { 
+                  fontStyle: 'bold',
+                  // Custom cell renderer for results
+                  cellCallback: (cell, data) => {
+                    if (data.raw === 'Win') {
+                      cell.styles.textColor = colors.success;
+                    } else if (data.raw === 'Loss') {
+                      cell.styles.textColor = colors.danger;
+                    }
+                    return cell;
+                  }
                 },
-                styles: {
-                  cellPadding: 2,
-                  fontSize: 8
-                },
-                margin: { left: 20, right: 20 }
-              });
-              
-              // Update Y position for next content
-              yPosition = pdf.previousAutoTable?.finalY ? pdf.previousAutoTable.finalY + 15 : yPosition + 40;
-            }
+                9: { 
+                  // Custom cell renderer for P/L column
+                  cellCallback: (cell, data) => {
+                    const value = parseFloat(data.raw);
+                    if (value > 0) {
+                      cell.styles.textColor = colors.success;
+                    } else if (value < 0) {
+                      cell.styles.textColor = colors.danger;
+                    }
+                    return cell;
+                  }
+                }
+              },
+              margin: { left: 10, right: 10 }
+            });
+            
+            // Update Y position
+            yPosition = pdf.previousAutoTable?.finalY ? pdf.previousAutoTable.finalY + 15 : yPosition + 40;
           } else {
+            // No trades message
             pdf.setFont('helvetica', 'italic');
             pdf.setFontSize(10);
             pdf.text("No trades recorded for this week", 20, yPosition);
             yPosition += 15;
           }
           
-          // Add page break between weeks (except the last one)
-          if (weekIndex < journal.weeks.length - 1) {
-            pdf.addPage();
-            yPosition = 20;
-          }
+          addFooter();
         });
         
         // Add page break before individual trade analysis
         pdf.addPage();
         
-        // Individual Trade Analysis
-        pdf.setFontSize(20);
+        // Individual Trade Analysis with modern design
+        pdf.setFillColor(...colors.primary);
+        pdf.rect(0, 0, pdf.internal.pageSize.getWidth(), 15, 'F');
+        pdf.setTextColor(255, 255, 255);
+        pdf.setFontSize(14);
         pdf.setFont('helvetica', 'bold');
-        pdf.text('Individual Trade Analysis', 15, 20);
+        pdf.text('INDIVIDUAL TRADE ANALYSIS', 20, 10);
         
-        yPosition = 30;
+        // Reset text color
+        pdf.setTextColor(...colors.dark);
+        
+        let yPosition = 25;
         
         // Get all completed trades across all weeks
         const allTrades = journal.weeks.flatMap(week => 
@@ -624,121 +849,178 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
           return dateB.getTime() - dateA.getTime();
         });
         
-        // Display detailed information for each trade
+        // Display detailed information for each trade with modern cards
         allTrades.forEach((trade, index) => {
           // Add new page if needed
-          if (yPosition > pdf.internal.pageSize.getHeight() - 70) {
+          if (yPosition > pdf.internal.pageSize.getHeight() - 80) {
             pdf.addPage();
-            yPosition = 20;
+            
+            // Add header to each page
+            pdf.setFillColor(...colors.primary);
+            pdf.rect(0, 0, pdf.internal.pageSize.getWidth(), 15, 'F');
+            pdf.setTextColor(255, 255, 255);
+            pdf.setFontSize(14);
+            pdf.setFont('helvetica', 'bold');
+            pdf.text('INDIVIDUAL TRADE ANALYSIS', 20, 10);
+            
+            // Reset position and text color
+            yPosition = 25;
+            pdf.setTextColor(...colors.dark);
           }
           
+          // Card-like design for each trade
+          // Draw card background
+          pdf.setFillColor(...colors.light);
+          pdf.setDrawColor(...colors.border);
+          pdf.roundedRect(15, yPosition, pdf.internal.pageSize.getWidth() - 30, 65, 3, 3, 'FD');
+          
           // Trade header with color based on result
-          pdf.setFontSize(12);
+          pdf.setFontSize(14);
           pdf.setFont('helvetica', 'bold');
           
           if (trade.result === 'Win') {
-            pdf.setTextColor(0, 150, 0);
+            pdf.setTextColor(...colors.success);
           } else if (trade.result === 'Loss') {
-            pdf.setTextColor(200, 0, 0);
+            pdf.setTextColor(...colors.danger);
           } else {
-            pdf.setTextColor(100, 100, 100);
+            pdf.setTextColor(...colors.dark);
           }
           
           const tradeDate = trade.date instanceof Date ? 
             trade.date.toLocaleDateString() : 
             new Date(trade.date).toLocaleDateString();
             
-          pdf.text(`Trade #${index + 1}: ${trade.pair} (${tradeDate})`, 15, yPosition);
-          pdf.setTextColor(40, 40, 40); // reset text color
+          pdf.text(`Trade #${index + 1}: ${trade.pair} (${tradeDate})`, 20, yPosition + 10);
           
-          yPosition += 8;
+          // Reset text color for details
+          pdf.setTextColor(...colors.dark);
           
           // Trade details
-          pdf.setFontSize(9);
+          pdf.setFontSize(10);
           pdf.setFont('helvetica', 'normal');
           
-          const tradeDetails = [
-            [`Week: ${(trade as any).weekName}`, `Type: ${trade.type}`, `Result: ${trade.result || 'N/A'}`],
-            [`Entry: ${trade.entry}`, `Stop Loss: ${trade.stopLoss}`, `Take Profit: ${trade.takeProfit}`],
-            [`Risk %: ${trade.risk}%`, `Risk/Reward: ${trade.riskReward.toFixed(2)}`, `P/L: ${trade.gainLossPercent.toFixed(2)}%`]
-          ];
+          let detailsY = yPosition + 20;
           
-          autoTable(pdf, {
-            body: tradeDetails,
-            startY: yPosition,
-            theme: 'plain',
-            styles: {
-              cellPadding: 2,
-              fontSize: 8
-            },
-            margin: { left: 20, right: 20 }
-          });
+          // Left column
+          pdf.text(`Week: ${(trade as any).weekName}`, 25, detailsY);
+          pdf.text(`Type: ${trade.type}`, 25, detailsY + 10);
+          pdf.text(`Entry: ${trade.entry}`, 25, detailsY + 20);
           
-          // Update Y position
-          yPosition = pdf.previousAutoTable?.finalY ? pdf.previousAutoTable.finalY + 5 : yPosition + 20;
+          // Middle column
+          pdf.text(`Stop Loss: ${trade.stopLoss}`, 85, detailsY);
+          pdf.text(`Take Profit: ${trade.takeProfit}`, 85, detailsY + 10);
+          pdf.text(`Risk: ${trade.risk}%`, 85, detailsY + 20);
+          
+          // Right column
+          pdf.text(`Risk/Reward: ${trade.riskReward.toFixed(2)}`, 145, detailsY);
+          
+          // Result with colored text
+          if (trade.result === 'Win') {
+            pdf.setTextColor(...colors.success);
+          } else if (trade.result === 'Loss') {
+            pdf.setTextColor(...colors.danger);
+          } else {
+            pdf.setTextColor(...colors.dark);
+          }
+          pdf.text(`Result: ${trade.result || 'N/A'}`, 145, detailsY + 10);
+          
+          // P/L with colored text
+          if (trade.gainLossPercent > 0) {
+            pdf.setTextColor(...colors.success);
+          } else if (trade.gainLossPercent < 0) {
+            pdf.setTextColor(...colors.danger);
+          } else {
+            pdf.setTextColor(...colors.dark);
+          }
+          pdf.text(`P/L: ${trade.gainLossPercent.toFixed(2)}%`, 145, detailsY + 20);
+          
+          // Reset text color
+          pdf.setTextColor(...colors.dark);
           
           // Add trade comments if any
           if (trade.comment) {
-            pdf.setFontSize(8);
+            pdf.setFontSize(9);
             pdf.setFont('helvetica', 'italic');
-            pdf.text("Comments:", 20, yPosition);
+            pdf.text("Comments:", 25, detailsY + 35);
             
-            // Wrap comments text to fit the page width
-            const splitComment = pdf.splitTextToSize(trade.comment, 170);
-            pdf.text(splitComment, 20, yPosition + 5);
-            
-            // Update position based on comment length
-            yPosition += 5 + (splitComment.length * 3.5);
+            // Wrap comments text to fit the card width
+            pdf.setFont('helvetica', 'normal');
+            const splitComment = pdf.splitTextToSize(trade.comment, 160);
+            pdf.text(splitComment, 25, detailsY + 42);
           }
           
-          // Add trade separator
-          pdf.setDrawColor(200, 200, 200);
-          pdf.line(15, yPosition + 5, 195, yPosition + 5);
-          yPosition += 15;
+          // Move to next trade
+          yPosition += 75;
+          
+          addFooter();
         });
         
         // Add final page with conclusions
         pdf.addPage();
-        pdf.setTextColor(40, 40, 40);
-        pdf.setFontSize(20);
-        pdf.setFont('helvetica', 'bold');
-        pdf.text('Trading Journal Summary', 15, 20);
         
-        // Add some trading insights
+        // Modern conclusion page
+        pdf.setFillColor(...colors.primary);
+        pdf.rect(0, 0, pdf.internal.pageSize.getWidth(), 15, 'F');
+        pdf.setTextColor(255, 255, 255);
+        pdf.setFontSize(14);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('TRADING JOURNAL SUMMARY', 20, 10);
+        
+        // Reset text color
+        pdf.setTextColor(...colors.dark);
+        
+        // Add trading insights with modern design
         pdf.setFontSize(12);
         pdf.setFont('helvetica', 'normal');
         const totalTrades = stats.totalTrades;
         const winRate = stats.winRate;
         
-        let insights = "Performance Insights:\n\n";
+        // Create a conclusion card
+        pdf.setFillColor(...colors.light);
+        pdf.setDrawColor(...colors.border);
+        pdf.roundedRect(15, 25, pdf.internal.pageSize.getWidth() - 30, 100, 3, 3, 'FD');
+        
+        let insights = "Performance Insights:";
+        pdf.setFont('helvetica', 'bold');
+        pdf.text(insights, 25, 35);
+        pdf.setFont('helvetica', 'normal');
         
         if (totalTrades > 0) {
-          insights += `Your overall win rate is ${winRate.toFixed(2)}% across ${totalTrades} trades.\n\n`;
+          let insightText = `Your overall win rate is ${winRate.toFixed(2)}% across ${totalTrades} trades.`;
+          pdf.text(insightText, 25, 45);
           
           if (winRate > 60) {
-            insights += "You have a strong win rate above 60%, indicating good trade selection.\n";
+            insightText = "You have a strong win rate above 60%, indicating good trade selection.";
+            pdf.text(insightText, 25, 55);
           } else if (winRate < 40) {
-            insights += "Your win rate is below 40%, suggesting a review of your trading strategy might be beneficial.\n";
+            insightText = "Your win rate is below 40%, suggesting a review of your trading strategy might be beneficial.";
+            pdf.text(insightText, 25, 55);
           } else {
-            insights += "Your win rate is in the average range, between 40-60%.\n";
+            insightText = "Your win rate is in the average range, between 40-60%.";
+            pdf.text(insightText, 25, 55);
           }
           
           if (stats.riskRewardAverage > 1.5) {
-            insights += "\nYour average risk/reward ratio is healthy at >1.5, showing good position sizing and profit targeting.";
+            insightText = "Your average risk/reward ratio is healthy at >1.5, showing good position sizing and profit targeting.";
+            pdf.text(insightText, 25, 65);
           } else if (stats.riskRewardAverage < 1) {
-            insights += "\nYour average risk/reward ratio is below 1:1, which may impact long-term profitability.";
+            insightText = "Your average risk/reward ratio is below 1:1, which may impact long-term profitability.";
+            pdf.text(insightText, 25, 65);
           }
         } else {
-          insights += "No completed trades yet. Start adding trades with outcomes to get insights.";
+          pdf.text("No completed trades yet. Start adding trades with outcomes to get insights.", 25, 45);
         }
         
-        const splitInsights = pdf.splitTextToSize(insights, 180);
-        pdf.text(splitInsights, 15, 35);
+        // Add a thank you note
+        pdf.setFont('helvetica', 'italic');
+        pdf.text("Thank you for using YTR Trading Journal!", 25, 85);
         
-        // Save the PDF
-        pdf.save(`YTR_Trading_Journal_Comprehensive_${new Date().toISOString().split('T')[0]}.pdf`);
+        addFooter();
         
-        toast.success("Comprehensive report exported to PDF");
+        // Save the PDF with modern filename
+        pdf.save(`YTR_Trading_Journal_Report_${new Date().toISOString().split('T')[0]}.pdf`);
+        
+        toast.success("Professional report exported to PDF");
       }).catch(err => {
         console.error("Error loading jspdf-autotable:", err);
         toast.error("Error exporting report to PDF");

@@ -48,10 +48,10 @@ const Navbar = () => {
           <Button 
             variant="outline" 
             onClick={exportToPDF} 
-            className="flex text-xs h-8 bg-blue-500 hover:bg-blue-600 text-white"
+            className="flex text-xs h-8 bg-primary hover:bg-primary/90 text-white"
             size="sm"
           >
-            <FileText className="mr-1.5 h-3.5 w-3.5" /> Export Comprehensive PDF
+            <FileText className="mr-1.5 h-3.5 w-3.5" /> Export Professional PDF
           </Button>
           
           <ThemeToggle />
